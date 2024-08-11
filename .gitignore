@@ -1,0 +1,4 @@
+/client/node_modules
+/server/node_modules
+/server/src/v1/config/fbServiceAccountKey.json
+/client/src/firebase.js
