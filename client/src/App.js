@@ -20,6 +20,8 @@ const History = React.lazy(() => import("./screens/user/History")) ;
 const Password = React.lazy(() => import("./screens/user/Password")) ;
 const Wishlist = React.lazy(() => import("./screens/user/Wishlist")) ;
 const AdminDashboard = React.lazy(() => import("./screens/admin/AdminDashboard")) ;
+const CategoryCreate = React.lazy(() => import("./screens/admin/category/CategoryCreate")) ;
+
 
 function App() {
   const dispatch = useDispatch();
@@ -61,6 +63,7 @@ function App() {
       { path:"/user/password", element:UserRoute(Password)},
       { path:"/user/wishlist", element:UserRoute(Wishlist)},
       { path:"/admin/dashboard", element:AdminRoute(AdminDashboard)},
+      { path:"/admin/category", element:AdminRoute(CategoryCreate)},
      ]
 
   return (
