@@ -84,3 +84,7 @@ Both the frontend and backend use Firebase for authentication and other services
 
 2. **Frontend**:
    - Update `client/src/firebase.js` with your Firebase project configuration details.
+
+If you have any questions or run into issues, feel free to open an issue in the repository or reach out to the maintainers.
+
+Happy coding! 🚀
