@@ -14,11 +14,6 @@ exports.create = async (req, res) => {
 exports.list = async (req, res) =>
   res.json({data:await Category.find({}).sort({ createdAt: -1 }).exec()});
 
-exports.read = async (req, res) => {
-  let category = await Category.findOne({ slug: req.params.slug }).exec();
-  res.json({data:category});
-};
-
 exports.update = async (req, res) => {
   const { name } = req.body;
   try {

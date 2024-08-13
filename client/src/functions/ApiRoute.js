@@ -8,12 +8,17 @@ module.exports = {
     //order
     GET_ORDER:BASE_URL+"admin/orders",   
     CHANGE_STATUS:BASE_URL+"admin/order-status",
+
    //category
-    GET_CATEGORIES:BASE_URL+"admin/categories",
-    GET_CATEGORY:BASE_URL+"admin/category/",
+    GET_CATEGORIES:BASE_URL+"categories",
     REMOVE_UPDATE_CATEGORY:BASE_URL+"category/",
     CREATE_CATEGORY:BASE_URL+"category",
     GET_CATEGORYSUB:BASE_URL+"category/subs/",
+
+    //SUBCATEGORY
+    GET_CREATE_SUBS:BASE_URL+"sub",
+    GET_REMOVE_UPDATE_SUB:BASE_URL+"sub/",
+
     //COUPON
     GET_COUPON:BASE_URL+"coupons",
     REMOVE_COUPON:BASE_URL+"coupon/",
@@ -26,8 +31,6 @@ module.exports = {
     GET_RELATED:BASE_URL+"product/",
     FETCH_PRODUCT_BY_FILTER:BASE_URL+"product/",
     CREATE_PAYMENT_INTENT:BASE_URL+"create-payment-intent",
-    //SUBCATEGORY
-    GET_CREATE_SUBS:BASE_URL+"SUB",
-    GET_REMOVE_UPDATE_SUB:BASE_URL+"SUB/",
+
     
 }

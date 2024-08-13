@@ -20,7 +20,8 @@ const History = React.lazy(() => import("./screens/user/History")) ;
 const Password = React.lazy(() => import("./screens/user/Password")) ;
 const Wishlist = React.lazy(() => import("./screens/user/Wishlist")) ;
 const AdminDashboard = React.lazy(() => import("./screens/admin/AdminDashboard")) ;
-const CategoryCreate = React.lazy(() => import("./screens/admin/category/CategoryCreate")) ;
+const Category = React.lazy(() => import("./screens/admin/category/CategoryCreate")) ;
+const Subcategory = React.lazy(() => import("./screens/admin/sub/SubCreate")) ;
 
 
 function App() {
@@ -63,7 +64,8 @@ function App() {
       { path:"/user/password", element:UserRoute(Password)},
       { path:"/user/wishlist", element:UserRoute(Wishlist)},
       { path:"/admin/dashboard", element:AdminRoute(AdminDashboard)},
-      { path:"/admin/category", element:AdminRoute(CategoryCreate)},
+      { path:"/admin/category", element:AdminRoute(Category)},
+      { path:"/admin/sub", element:AdminRoute(Subcategory)},
      ]
 
   return (
