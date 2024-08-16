@@ -17,7 +17,10 @@ exports.list = async (req, res) =>{
   res.json({data:SubData});
 }
 
-
+  exports.read = async (req, res) => {
+   const SubData = await Sub.find({ parent: req.params._id }).exec();
+    res.json({data:SubData});
+  };
 
 exports.update = async (req, res) => {
   const { name, parent } = req.body;

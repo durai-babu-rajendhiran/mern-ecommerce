@@ -21,7 +21,8 @@ const Password = React.lazy(() => import("./screens/user/Password")) ;
 const Wishlist = React.lazy(() => import("./screens/user/Wishlist")) ;
 const AdminDashboard = React.lazy(() => import("./screens/admin/AdminDashboard")) ;
 const Category = React.lazy(() => import("./screens/admin/category/CategoryCreate")) ;
-const Subcategory = React.lazy(() => import("./screens/admin/sub/SubCreate")) ;
+const Subcategory = React.lazy(() => import("./screens/admin/sub/SubCreate"));
+const product = React.lazy(() => import("./screens/admin/product/ProductCreate"));
 
 
 function App() {
@@ -66,6 +67,7 @@ function App() {
       { path:"/admin/dashboard", element:AdminRoute(AdminDashboard)},
       { path:"/admin/category", element:AdminRoute(Category)},
       { path:"/admin/sub", element:AdminRoute(Subcategory)},
+      { path:"/admin/products", element:AdminRoute(product)},
      ]
 
   return (

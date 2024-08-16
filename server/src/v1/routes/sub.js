@@ -7,5 +7,5 @@ router.post("/sub", authCheck, adminCheck, create);
 router.get("/sub", list);
 router.put("/sub/:slug", authCheck, adminCheck, update);
 router.delete("/sub/:slug", authCheck, adminCheck, remove);
-
+router.get("/sub/:_id", read);
 module.exports = router;
