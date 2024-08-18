@@ -1,4 +1,5 @@
 /client/node_modules
 /server/node_modules
+/server/uploads
 /server/src/v1/config/fbServiceAccountKey.json
 /client/src/firebase.js
