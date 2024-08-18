@@ -126,22 +126,29 @@ const ProductCreateForm = ({
             ))}
         </select>
       </div>
-
       {showSub && (
         <div>
-          <label>Sub Categories</label>
+          <label htmlFor="sub-categories">Sub Categories</label>
           <select
+            id="sub-categories"
+            multiple
+            className="form-select"
             style={{ width: "100%" }}
-            placeholder="Please select"
             value={subs}
-            onChange={(e) => setValues({ ...values, subs: e.target.value })}
+            onChange={(e) => {
+              const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+              setValues({ ...values, subs: selectedOptions });
+            }}
           >
-            {subOptions.length &&
+            {subOptions.length > 0 ? (
               subOptions.map((s) => (
                 <option key={s._id} value={s._id}>
                   {s.name}
                 </option>
-              ))}
+              ))
+            ) : (
+              <option value="">No options available</option>
+            )}
           </select>
         </div>
       )}

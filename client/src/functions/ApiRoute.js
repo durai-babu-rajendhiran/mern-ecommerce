@@ -25,6 +25,8 @@ module.exports = {
     CREATE_COUPON:BASE_URL+"coupon",
     //PRODUCT
     CREATE_PRODUCT:BASE_URL+"product",
+    UPLOAD_IMAGE:BASE_URL+"uploadimages",
+    REMOVE_IMAGE:BASE_URL+"removeimage",
     GET_PRODUCT_BY_COUNT:BASE_URL+"products/",
     GET_REMOVE_UPDATE_COUNT_PRODUCT:BASE_URL+"product/",
     PRODUCT_STAR:BASE_URL+"product/",

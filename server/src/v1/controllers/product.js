@@ -9,13 +9,19 @@ exports.create = async (req, res) => {
     res.json({data:newProduct});
   } catch (err) {
     console.log(err);
+    // res.status(400).send("Create product failed");
     res.status(400).json({
       err: err.message,
     });
   }
 };
 
-exports.read = async (req, res) => {
-  let products = await Product.find({});
+exports.listAll = async (req, res) => {
+  let products = await Product.find({})
+    .limit(parseInt(req.params.count))
+    .populate("category")
+    .populate("subs")
+    .sort([["createdAt", "desc"]])
+    .exec();
   res.json({data:products});
 };
