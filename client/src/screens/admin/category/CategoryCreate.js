@@ -6,6 +6,7 @@ import { CREATE_CATEGORY, GET_CATEGORIES, REMOVE_UPDATE_CATEGORY } from "../../.
 import FetchData from "../../../functions/FetchApi";
 import CategoryForm from "../../../components/forms/CategoryForm";
 import LocalSearch from "../../../components/forms/LocalSearch";
+import ModalPopup from "../../../components/forms/ModalPopup";
 
 const CategoryCreate = () => {
   const { user } = useSelector((state) => ({ ...state }));
@@ -149,15 +150,7 @@ const CategoryCreate = () => {
           </div>
         </div>
       </div>
-      <div
-        className="modal fade"
-        id="exampleModal"
-        tabIndex={-1}
-        aria-labelledby="exampleModalLabel"
-        aria-hidden="true"
-      >
-        <div className="modal-dialog">
-          <div className="modal-content">
+      <ModalPopup>
             <div className="modal-header">
               <h1 className="modal-title fs-5" id="exampleModalLabel">
                 Edit Category
@@ -179,7 +172,7 @@ const CategoryCreate = () => {
                 autoFocus
                 required
               />
-            </div>
+            </div>          
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">
                 Close
@@ -188,9 +181,7 @@ const CategoryCreate = () => {
                 Save changes
               </button>
             </div>
-          </div>
-        </div>
-      </div>
+      </ModalPopup>
     </div>
   );
 };

@@ -7,6 +7,7 @@ import CategoryForm from "../../../components/forms/CategoryForm";
 import LocalSearch from "../../../components/forms/LocalSearch";
 import {GET_CATEGORIES,GET_CREATE_SUBS,GET_REMOVE_UPDATE_SUB } from "../../../functions/ApiRoute";
 import FetchData from "../../../functions/FetchApi";
+import ModalPopup from "../../../components/forms/ModalPopup";
 
 const SubCreate = () => {
   const { user } = useSelector((state) => ({ ...state }));
@@ -195,15 +196,7 @@ const SubCreate = () => {
             </table>
           </div>
         </div>
-        <div
-        className="modal fade"
-        id="exampleModal"
-        tabIndex={-1}
-        aria-labelledby="exampleModalLabel"
-        aria-hidden="true"
-      >
-        <div className="modal-dialog">
-          <div className="modal-content">
+        <ModalPopup>
             <div className="modal-header">
               <h1 className="modal-title fs-5" id="exampleModalLabel">
                 Edit sub category
@@ -249,9 +242,7 @@ const SubCreate = () => {
                 Save changes
               </button>
             </div>
-          </div>
-        </div>
-      </div>
+        </ModalPopup>
       </div>
     </div>
   );

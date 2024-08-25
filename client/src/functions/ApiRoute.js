@@ -1,7 +1,9 @@
 const BASE_URL = process.env.REACT_APP_API
 
 module.exports = {
-   //user
+    BASEURL:'http://localhost:8000/',
+    // BASEURL:process.env.REACT_BASE_URL,
+    //user
     CREATE_UPDATE_USER:BASE_URL+"create-or-update-user",   
     CURRENT_USER:BASE_URL+"current-user",
     CURRENT_ADMIN:BASE_URL+"current-admin",   

@@ -1,5 +1,5 @@
 const formidable = require('formidable');
-const imageUpload = require('../utils/ImageUpload');
+const {ImageUpload,RemoveImage} = require('../utils/ImageUpload');
 
 // req.files.file.path
 exports.upload = async (req, res) => {
@@ -9,7 +9,7 @@ exports.upload = async (req, res) => {
         if (err) {
             return res.status(500).json({ error: err.message });
         }
-        var file = await imageUpload(files.mediaUrls);
+        var file = await ImageUpload(files.mediaUrls);
         if (Array.isArray(file)) {
             file = file
         }else{
@@ -31,4 +31,18 @@ exports.upload = async (req, res) => {
 }
 }
 
+
+
+exports.remove = async(req, res) => {
+    const { image } = req.body; // Assuming you pass the image name in the request body
+    console.log(image)
+    if (!image) {
+      return res.status(400).json({ error: 'Image name is required' });
+    }
+    const filePath = await RemoveImage(image);
+    if(!filePath){
+        return res.status(500).json({ error: "Erro in Image delete" });
+    }
+      return res.json({ message: 'Image deleted successfully' });
+  };
 

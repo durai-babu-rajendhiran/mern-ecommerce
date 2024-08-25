@@ -15,7 +15,7 @@ const copyFile = (source, destination) => {
 
 };
 
-const imageUpload = async files => {
+const ImageUpload = async files => {
 var condition = false
  if(files?.length>1){
    var filenames = [];
@@ -45,4 +45,23 @@ var condition = false
   return filenames;
 };
 
-module.exports = imageUpload;
+
+const RemoveImage = async (image) => {
+  if (!image) {
+    return false;
+  }
+  const filePath = path.join(imgpath, image);
+  try {
+    await fs.promises.unlink(filePath);
+    return true;
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      return false; // File does not exist
+    }
+    console.error('Error removing file:', err);
+    return false; // Other errors
+  }
+};
+
+
+module.exports = {ImageUpload,RemoveImage};

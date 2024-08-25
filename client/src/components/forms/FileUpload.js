@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import FetchData from "../../functions/FetchApi";
-import {UPLOAD_IMAGE,REMOVE_IMAGE} from "../../functions/ApiRoute"
+import {UPLOAD_IMAGE,REMOVE_IMAGE,BASEURL} from "../../functions/ApiRoute"
 const FileUpload = ({ values, setValues, setLoading }) => {
   const { user } = useSelector((state) => ({ ...state }));
-
   const resizeImage = (file, maxWidth, maxHeight) => {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -43,61 +42,64 @@ const FileUpload = ({ values, setValues, setLoading }) => {
 
   const fileUploadAndResize = async (e) => {
     const files = Array.from(e.target.files); // Convert FileList to array
-    let allUploadedFiles = values.images;
   
     try {
       const formData = new FormData();
-      
-      // Use Promise.all to handle async map
-      await Promise.all(files.map(async (selectedFile) => {
-          // Assuming resizeImage is a function that returns a resized Blob
+        await Promise.all(files.map(async (selectedFile) => {
           const resizedBlob = await resizeImage(selectedFile, 720, 720);
           formData.append("mediaUrls", resizedBlob, selectedFile.name); // Ensure proper naming
       }));
+      // const res = await FetchData(UPLOAD_IMAGE, "POST", formData, user.token, true);
       const res = await FetchData(UPLOAD_IMAGE, "POST", formData, user.token, true);
       if (res) {
-          allUploadedFiles.push(res.data);
-          setValues({ ...values, images: allUploadedFiles });      
+        const imageUrls = Array.isArray(res.url) ? res.url : [res.url];
+
+        // Update the state with the new image URLs
+        setValues((prevValues) => ({
+          ...prevValues,
+          imageUrls: [
+            ...(prevValues.imageUrls || []), // Spread existing URLs, default to empty array if undefined
+            ...imageUrls // Add new URLs
+          ] // Adjust as needed if imageUrls is the correct key
+        }));     
       }
     } catch (error) {
       console.error("IMAGE UPLOAD ERR", error);
     }
   };
 
-  const handleImageRemove = async (public_id) => {
+  const handleImageRemove = async (image) => {
     setLoading(true);
     try {
-      const res = await FetchData(REMOVE_IMAGE, "POST",{ public_id },user.token,true);
+      const res = await FetchData(REMOVE_IMAGE, "POST", JSON.stringify({image}), user.token, false);
       if (res) {
-        const filteredImages = values.images.filter((item) => item.public_id !== public_id);
-        setValues({ ...values, images: filteredImages });  
+        const filteredImages = values.imageUrls.filter((item) => item != image);
+        setValues({ ...values, imageUrls: filteredImages });  
       }
     } catch (error) {
       console.error("REMOVE IMAGE ERR", error);
     }
-    
     setLoading(false);
   };
 
   return (
     <>
       <div className="row">
-        {JSON.stringify(values.images)}
-        {values.images &&
-          values.images.map((image) => (
-            <div className="col-3 mb-3" key={image?.public_id}>
-              <div className="position-relative">
+        {values.imageUrls &&
+          values.imageUrls.map((image) => (
+            <div className="col-3 mb-3" key={image}>
+              <div className="position-relative">        
                 <img
-                  src={image?.url}
+                  src={BASEURL+image}
                   alt="Uploaded"
                   className="img-fluid"
                   style={{ cursor: "pointer" }}
-                  onClick={() => handleImageRemove(image?.public_id)}
+                  onClick={() => handleImageRemove(image)}
                 />
                 <button
                   type="button"
                   className="btn btn-danger btn-sm position-absolute top-0 end-0"
-                  onClick={() => handleImageRemove(image?.public_id)}
+                  onClick={() => handleImageRemove(image)}
                 >
                   X
                 </button>

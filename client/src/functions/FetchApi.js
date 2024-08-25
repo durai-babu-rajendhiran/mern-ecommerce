@@ -11,13 +11,11 @@ async function makeRequest(endpoint, method, data, token,form) {
         headers.authtoken = token;
         // headers.Authorization = `Bearer ${token?localStorage.getItem("TOKEN"):""}`;
     }
-
     const response = await fetch(endpoint, {
         method,
         headers,
         body: data // Send JSON data directly in the body
     });
-
     const content = await getResponseContent(response);
     if (response.ok) return content;
 

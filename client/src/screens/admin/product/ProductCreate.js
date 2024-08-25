@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import AdminNav from "../../../components/nav/AdminNav";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import ProductCreateForm from "../../../components/forms/ProductCreateForm";
 import FileUpload from "../../../components/forms/FileUpload";
-import { CREATE_PRODUCT,GET_CATEGORIES,GET_CREATE_SUBS} from "../../../functions/ApiRoute";
+import { CREATE_PRODUCT, GET_CATEGORIES, GET_CREATE_SUBS } from "../../../functions/ApiRoute";
 import FetchData from "../../../functions/FetchApi";
+import ModalPopup from "../../../components/forms/ModalPopup";
 
 const initialState = {
   title: "Macbook Pro",
@@ -28,7 +29,7 @@ const ProductCreate = () => {
   const [subOptions, setSubOptions] = useState([]);
   const [showSub, setShowSub] = useState(false);
   const [loading, setLoading] = useState(false);
-
+  const btnRef = useRef(null);
   // redux
   const { user } = useSelector((state) => ({ ...state }));
 
@@ -48,7 +49,7 @@ const ProductCreate = () => {
   };
 
 
-  const handleSubmit = async(e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
@@ -67,24 +68,22 @@ const ProductCreate = () => {
 
   const handleChange = (e) => {
     setValues({ ...values, [e.target.name]: e.target.value });
-    // console.log(e.target.name, " ----- ", e.target.value);
   };
 
-  const handleCatagoryChange = async(e) => {
+  const handleCatagoryChange = async (e) => {
     e.preventDefault();
-    console.log("CLICKED CATEGORY", e.target.value);
     setValues({ ...values, subs: [], category: e.target.value });
-    const res = await FetchData(GET_CREATE_SUBS+"/"+e.target.value, "GET",null, user.token);
+    const res = await FetchData(GET_CREATE_SUBS + "/" + e.target.value, "GET", null, user.token);
     if (res) {
-        console.log("SUB OPTIONS ON CATGORY CLICK", res);
-        setSubOptions(res.data);
-        setShowSub(true);
+      console.log("SUB OPTIONS ON CATGORY CLICK", res);
+      setSubOptions(res.data);
+      setShowSub(true);
     }
   };
 
-  useEffect(()=>{
-console.log("data",values)
-  },[values.subs])
+  useEffect(() => {
+    console.log("data", values)
+  }, [values.subs])
 
   return (
     <div className="container-fluid">
@@ -97,21 +96,43 @@ console.log("data",values)
           <h4>Product create</h4>
           <hr />
           <div className="p-3">
-            <FileUpload
-              values={values}
-              setValues={setValues}
-              setLoading={setLoading}
-            />
+            <button className="btn btn-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#exampleModal"
+            >Add Products</button>
           </div>
-          <ProductCreateForm
-            handleSubmit={handleSubmit}
-            handleChange={handleChange}
-            setValues={setValues}
-            values={values}
-            handleCatagoryChange={handleCatagoryChange}
-            subOptions={subOptions}
-            showSub={showSub}
-          />
+          <ModalPopup>
+            <div className="modal-header">
+              <h1 className="modal-title fs-5" id="exampleModalLabel">
+                Edit sub category
+              </h1>
+              <button
+                type="button"
+                className="btn-close"
+                ref={btnRef}
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              />
+            </div>
+            <div className="modal-body">
+              <div className="p-3">
+                <FileUpload
+                  values={values}
+                  setValues={setValues}
+                  setLoading={setLoading}
+                />
+              </div>
+              <ProductCreateForm
+                handleSubmit={handleSubmit}
+                handleChange={handleChange}
+                setValues={setValues}
+                values={values}
+                handleCatagoryChange={handleCatagoryChange}
+                subOptions={subOptions}
+                showSub={showSub}
+              />
+            </div>
+          </ModalPopup>
         </div>
       </div>
     </div>
