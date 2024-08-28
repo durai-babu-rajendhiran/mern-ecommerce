@@ -29,11 +29,9 @@ module.exports = {
     CREATE_PRODUCT:BASE_URL+"product",
     UPLOAD_IMAGE:BASE_URL+"uploadimages",
     REMOVE_IMAGE:BASE_URL+"removeimage",
+
     GET_PRODUCT_BY_COUNT:BASE_URL+"products/",
     GET_REMOVE_UPDATE_COUNT_PRODUCT:BASE_URL+"product/",
-    PRODUCT_STAR:BASE_URL+"product/",
-    GET_RELATED:BASE_URL+"product/",
-    FETCH_PRODUCT_BY_FILTER:BASE_URL+"product/",
     CREATE_PAYMENT_INTENT:BASE_URL+"create-payment-intent",
 
     

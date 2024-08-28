@@ -52,15 +52,15 @@ const FileUpload = ({ values, setValues, setLoading }) => {
       // const res = await FetchData(UPLOAD_IMAGE, "POST", formData, user.token, true);
       const res = await FetchData(UPLOAD_IMAGE, "POST", formData, user.token, true);
       if (res) {
-        const imageUrls = Array.isArray(res.url) ? res.url : [res.url];
+        const images = Array.isArray(res.url) ? res.url : [res.url];
 
         // Update the state with the new image URLs
         setValues((prevValues) => ({
           ...prevValues,
-          imageUrls: [
-            ...(prevValues.imageUrls || []), // Spread existing URLs, default to empty array if undefined
-            ...imageUrls // Add new URLs
-          ] // Adjust as needed if imageUrls is the correct key
+          images: [
+            ...(prevValues.images || []), // Spread existing URLs, default to empty array if undefined
+            ...images // Add new URLs
+          ] // Adjust as needed if images is the correct key
         }));     
       }
     } catch (error) {
@@ -73,8 +73,8 @@ const FileUpload = ({ values, setValues, setLoading }) => {
     try {
       const res = await FetchData(REMOVE_IMAGE, "POST", JSON.stringify({image}), user.token, false);
       if (res) {
-        const filteredImages = values.imageUrls.filter((item) => item != image);
-        setValues({ ...values, imageUrls: filteredImages });  
+        const filteredImages = values.images.filter((item) => item != image);
+        setValues({ ...values, images: filteredImages });  
       }
     } catch (error) {
       console.error("REMOVE IMAGE ERR", error);
@@ -85,8 +85,8 @@ const FileUpload = ({ values, setValues, setLoading }) => {
   return (
     <>
       <div className="row">
-        {values.imageUrls &&
-          values.imageUrls.map((image) => (
+        {values.images &&
+          values.images.map((image) => (
             <div className="col-3 mb-3" key={image}>
               <div className="position-relative">        
                 <img
