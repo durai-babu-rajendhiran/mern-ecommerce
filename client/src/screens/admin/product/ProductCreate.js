@@ -97,9 +97,10 @@ const ProductCreate = () => {
 
   const handleCategoryChange = async (e, isEditMode = false) => {
     const categoryId = isEditMode ? e : e.target.value;
-    setValues({ ...values, subs: [], category: categoryId });
+    if(!isEditMode){
+      setValues({ ...values, subs: [], category: categoryId });
+    }
     setSelectedCategory(categoryId);
-
     try {
       const res = await FetchData(GET_CREATE_SUBS + "/" + categoryId, "GET", null, user.token);
       setSubOptions(res.data);
@@ -127,13 +128,16 @@ const ProductCreate = () => {
 
   const handleEdit = async (slug) => {
     try {
-      setEditMode(true);
+      setEditMode(slug);
       const res = await FetchData(GET_REMOVE_UPDATE_COUNT_PRODUCT + slug, "GET", null, user.token);
-      setValues(res.data);
-  
+     if(res.data){
+      setValues((prevValues) => ({ ...prevValues, ...res.data }));
+      // setValues(res.data);
+      console.log('Fetched data:', values);
       handleCategoryChange(res.data.category._id, true);
       const subIds = res.data.subs.map((sub) => sub._id);
       setArrayOfSubs(subIds);
+     }
     } catch (err) {
       console.error("Failed to load product details:", err);
       toast.error(err.response?.data || "Failed to load product details");
@@ -141,7 +145,18 @@ const ProductCreate = () => {
   };
 
   const handleUpdate = async () => {
-    // Implement update functionality here
+    try {
+      values.subs = arrayOfSubs;
+      values.category = selectedCategory ? selectedCategory : values.category;
+      const res = await FetchData(GET_REMOVE_UPDATE_COUNT_PRODUCT + editMode, "PUT", JSON.stringify(values), user.token);
+      setLoading(false);
+      toast.success(`"${res.data.title}" is updated`);
+      window.location.reload();
+    } catch (err) {
+      console.log(err);
+      setLoading(false);
+      toast.error(err.response.data.err);
+    };
   };
 
   const resetForm = () => {

@@ -29,7 +29,7 @@ const ProductUpdateForm = ({
   } = values;
 
   return (
-    <form onSubmit={handleSubmit}>
+    <div>
       <div className="form-group">
         <label>Title</label>
         <input
@@ -141,29 +141,29 @@ const ProductUpdateForm = ({
       <div>
           <label htmlFor="sub-categories">Sub Categories</label>
           <select
-            id="sub-categories"
-            multiple
-            className="form-select"
-            style={{ width: "100%" }}
-            value={arrayOfSubs}
-            onChange={(value) => setArrayOfSubs(value)}
-            // value={subs}
-            // onChange={(e) => {
-            //   const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
-            //   setValues({ ...values, subs: selectedOptions });
-            // }}
-          >
-          {subOptions.length &&
-            subOptions.map((s) => (
-                <option key={s._id} value={s._id}>
-                  {s.name}
-                </option>
-              ))}
-          </select>
+  id="sub-categories"
+  multiple
+  className="form-select"
+  style={{ width: "100%" }}
+  value={arrayOfSubs} // Ensure this reflects the selected options
+  onChange={(e) => {
+    const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+    setArrayOfSubs(selectedOptions); // Directly update with selected options
+  }}
+>
+  {subOptions.length &&
+    subOptions.map((s) => (
+      <option key={s._id} value={s._id}>
+        {s.name}
+      </option>
+    ))}
+</select>
         </div>
       <br />
-      <button className="btn btn-outline-info">Save</button>
-    </form>
+      <button className="btn btn-outline-info"
+      onClick={()=>{handleSubmit()}}
+      >Save</button>
+    </div>
   );
 };
 
