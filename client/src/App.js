@@ -6,10 +6,10 @@ import { useDispatch } from "react-redux";
 import { auth } from "./firebase";
 import UserRoute from "./components/routes/UserRoute";
 import AdminRoute from "./components/routes/AdminRoute";
-import {CURRENT_USER} from "./functions/ApiRoute";
-import FetchData from "./functions/FetchApi"
+import {CURRENT_USER} from "./utils/ApiRoute";
+import FetchData from "./utils/FetchApi"
 import { onAuthStateChanged } from 'firebase/auth';
-
+import 'react-loading-skeleton/dist/skeleton.css';
 const Login = React.lazy(() => import("./screens/auth/Login"));
 const Register = React.lazy(() => import("./screens/auth/Register"));
 const ForgotPassword = React.lazy(() => import("./screens/auth/ForgotPassword"));
@@ -22,7 +22,8 @@ const Wishlist = React.lazy(() => import("./screens/user/Wishlist")) ;
 const AdminDashboard = React.lazy(() => import("./screens/admin/AdminDashboard")) ;
 const Category = React.lazy(() => import("./screens/admin/category/CategoryCreate")) ;
 const Subcategory = React.lazy(() => import("./screens/admin/sub/SubCreate"));
-const product = React.lazy(() => import("./screens/admin/product/ProductCreate"));
+const ProductCreate = React.lazy(() => import("./screens/admin/product/ProductCreate"));
+const Product = React.lazy(() => import("./screens/Product"));
 
 
 function App() {
@@ -64,10 +65,11 @@ function App() {
       { path:"/user/history", element:UserRoute(History)},
       { path:"/user/password", element:UserRoute(Password)},
       { path:"/user/wishlist", element:UserRoute(Wishlist)},
+      { path:"/product/:slug", element:UserRoute(Product)},
       { path:"/admin/dashboard", element:AdminRoute(AdminDashboard)},
       { path:"/admin/category", element:AdminRoute(Category)},
       { path:"/admin/sub", element:AdminRoute(Subcategory)},
-      { path:"/admin/products", element:AdminRoute(product)},
+      { path:"/admin/products", element:AdminRoute(ProductCreate)},
      ]
 
   return (

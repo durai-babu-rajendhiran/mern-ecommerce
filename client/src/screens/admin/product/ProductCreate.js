@@ -11,8 +11,8 @@ import {
   GET_REMOVE_UPDATE_COUNT_PRODUCT,
   GET_PRODUCT_BY_COUNT,
   BASEURL,
-} from "../../../functions/ApiRoute";
-import FetchData from "../../../functions/FetchApi";
+} from "../../../utils/ApiRoute";
+import FetchData from "../../../utils/FetchApi";
 import ModalPopup from "../../../components/forms/ModalPopup";
 import ProductUpdateForm from "../../../components/forms/ProductUpdateForm";
 

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import FetchData from "../../functions/FetchApi";
-import {UPLOAD_IMAGE,REMOVE_IMAGE,BASEURL} from "../../functions/ApiRoute"
+import FetchData from "../../utils/FetchApi";
+import {UPLOAD_IMAGE,REMOVE_IMAGE,BASEURL} from "../../utils/ApiRoute"
 const FileUpload = ({ values, setValues, setLoading }) => {
   const { user } = useSelector((state) => ({ ...state }));
   const resizeImage = (file, maxWidth, maxHeight) => {

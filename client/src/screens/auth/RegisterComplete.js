@@ -4,8 +4,8 @@ import { toast } from "react-toastify";
 import { signInWithEmailLink, updatePassword, getIdTokenResult } from 'firebase/auth';
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import {CREATE_UPDATE_USER} from "../../functions/ApiRoute";
-import FetchData from "../../functions/FetchApi"
+import {CREATE_UPDATE_USER} from "../../utils/ApiRoute";
+import FetchData from "../../utils/FetchApi"
 const RegisterComplete = ({ history }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

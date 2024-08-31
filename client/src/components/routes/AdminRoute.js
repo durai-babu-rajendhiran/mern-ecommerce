@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Route, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import LoadingToRedirect from "./LoadingToRedirect";
-import {CURRENT_ADMIN} from "../../functions/ApiRoute";
-import FetchData from "../../functions/FetchApi"
+import {CURRENT_ADMIN} from "../../utils/ApiRoute";
+import FetchData from "../../utils/FetchApi"
 const AdminRoute = (Component) => {
   const { user } = useSelector((state) => ({ ...state }));
   const [ok, setOk] = useState(false);

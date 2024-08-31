@@ -4,8 +4,8 @@ import { auth ,googleAuthProvider} from "../../firebase";
 import { signInWithEmailAndPassword,signInWithPopup } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { toast } from "react-toastify";
-import {CREATE_UPDATE_USER} from "../../functions/ApiRoute";
-import FetchData from "../../functions/FetchApi"
+import {CREATE_UPDATE_USER} from "../../utils/ApiRoute";
+import FetchData from "../../utils/FetchApi"
 const Login = () => {
   const [email, setEmail] = useState("duraibabu200@gmail.com");
   const [password, setPassword] = useState("123456");

@@ -5,8 +5,8 @@ import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import CategoryForm from "../../../components/forms/CategoryForm";
 import LocalSearch from "../../../components/forms/LocalSearch";
-import {GET_CATEGORIES,GET_CREATE_SUBS,GET_REMOVE_UPDATE_SUB } from "../../../functions/ApiRoute";
-import FetchData from "../../../functions/FetchApi";
+import {GET_CATEGORIES,GET_CREATE_SUBS,GET_REMOVE_UPDATE_SUB } from "../../../utils/ApiRoute";
+import FetchData from "../../../utils/FetchApi";
 import ModalPopup from "../../../components/forms/ModalPopup";
 
 const SubCreate = () => {
