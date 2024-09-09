@@ -8,7 +8,7 @@ const ProductCard = ({ product }) => {
     return (
         <div className="card mb-4 shadow-sm" style={{ width: '18rem' }}>
           <img
-            src={images && images.length ? BASEURL+images[0] : "assets/images/laptop.png"}
+            src={images && images.length ? BASEURL+images[0] : "/assets/images/laptop.png"}
             style={{ height: "150px", objectFit: "cover" }}
             className="card-img-top"
           />
