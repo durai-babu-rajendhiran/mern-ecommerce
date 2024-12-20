@@ -9,11 +9,7 @@ const AdminNav = () => (
           Dashboard
         </Link>
       </li>  
-      <li className="nav-item">
-        <Link to="/admin/products" className="nav-link">
-          Products
-        </Link>
-      </li>
+
 
       <li className="nav-item">
         <Link to="/admin/category" className="nav-link">
@@ -26,7 +22,11 @@ const AdminNav = () => (
           Sub Category
         </Link>
       </li>
-
+      <li className="nav-item">
+        <Link to="/admin/products" className="nav-link">
+          Products
+        </Link>
+      </li>
       <li className="nav-item">
         <Link to="/admin/coupon" className="nav-link">
           Coupon

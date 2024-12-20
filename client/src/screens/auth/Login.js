@@ -4,8 +4,7 @@ import { auth ,googleAuthProvider} from "../../firebase";
 import { signInWithEmailAndPassword,signInWithPopup } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { toast } from "react-toastify";
-import {CREATE_UPDATE_USER} from "../../utils/ApiRoute";
-import FetchData from "../../utils/FetchApi"
+import {createUser} from "../../utils/ApiRoute";
 const Login = () => {
   const [email, setEmail] = useState("duraibabu200@gmail.com");
   const [password, setPassword] = useState("123456");
@@ -20,7 +19,7 @@ const Login = () => {
   }, [user]);
 
   const roleBasedRedirect = (res) => {
-    if (res.data.role === "admin") {
+    if (res.role === "admin") {
       navigate("/admin/dashboard");
     } else {
       navigate("/user/history");
@@ -34,16 +33,16 @@ const Login = () => {
       const result = await signInWithEmailAndPassword(auth,email, password);
       const { user } = result;
       const idTokenResult = await user.getIdTokenResult();
-      const res = await FetchData(CREATE_UPDATE_USER, "POST", null, idTokenResult.token, false);
+      const res = await createUser(idTokenResult.token);
       console.log(res)
       dispatch({
         type: "LOGGED_IN_USER",
         payload: {
-          name: res.data.name,
-          email: res.data.email,
+          name: res.name,
+          email: res.email,
           token: idTokenResult.token,
-          role: res.data.role,
-          _id: res.data._id,
+          role: res.role,
+          _id: res._id,
         },
       });
       roleBasedRedirect(res);

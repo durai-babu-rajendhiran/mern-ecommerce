@@ -4,8 +4,7 @@ import { toast } from "react-toastify";
 import { signInWithEmailLink, updatePassword, getIdTokenResult } from 'firebase/auth';
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import {CREATE_UPDATE_USER} from "../../utils/ApiRoute";
-import FetchData from "../../utils/FetchApi"
+import {createUser} from "../../utils/ApiRoute";
 const RegisterComplete = ({ history }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -48,16 +47,16 @@ const RegisterComplete = ({ history }) => {
         // Get user id token
         const idTokenResult = await getIdTokenResult(user);
         console.log("user", user, "idTokenResult", idTokenResult);
-        const res = await FetchData(CREATE_UPDATE_USER, "POST", null, idTokenResult.token, false);
+        const res = await createUser(idTokenResult.token);
        console.log(res)
         dispatch({
           type: "LOGGED_IN_USER",
           payload: {
-            name: res.data.name,
-            email: res.data.email,
+            name: res.name,
+            email: res.email,
             token: idTokenResult.token,
-            role: res.data.role,
-            _id: res.data._id,
+            role: res.role,
+            _id: res._id,
           },
         });
         // Redirect to homepage

@@ -1,39 +1,108 @@
-const BASE_URL = process.env.REACT_APP_API
+const APIBASE_URL = process.env.REACT_APP_API || 'http://localhost:8000/';
 
-module.exports = {
-    BASEURL:'http://localhost:8000/',
-    // BASEURL:process.env.REACT_BASE_URL,
-    //user
-    CREATE_UPDATE_USER:BASE_URL+"create-or-update-user",   
-    CURRENT_USER:BASE_URL+"current-user",
-    CURRENT_ADMIN:BASE_URL+"current-admin",   
-    //order
-    GET_ORDER:BASE_URL+"admin/orders",   
-    CHANGE_STATUS:BASE_URL+"admin/order-status",
+// Helper function to handle fetch requests
+const fetchRequest = async (url, method = 'GET', token = null, body = null) => {
+    const headers = {
+        'Content-Type': 'application/json',
+    };
+    if (token) {
+        headers['authtoken'] = `${token}`;
+    }
+    const options = {
+        method,
+        headers,
+    };
+    if (body) {
+        options.body = body instanceof FormData ? body : JSON.stringify(body);
+        if (body instanceof FormData) delete headers['Content-Type'];
+    }
+    const response = await fetch(`${APIBASE_URL}${url}`, options);
+    return response.json();
+};
 
-   //category
-    GET_CATEGORIES:BASE_URL+"categories",
-    REMOVE_UPDATE_CATEGORY:BASE_URL+"category/",
-    CREATE_CATEGORY:BASE_URL+"category",
-    GET_CATEGORYSUB:BASE_URL+"category/subs/",
+// User API
+export const BASEURL ='http://localhost:8000/'
 
-    //SUBCATEGORY
-    GET_CREATE_SUBS:BASE_URL+"sub",
-    GET_REMOVE_UPDATE_SUB:BASE_URL+"sub/",
+export const createUser = (token) =>
+    fetchRequest('create-or-update-user', 'POST', token);
 
-    //COUPON
-    GET_COUPON:BASE_URL+"coupons",
-    REMOVE_COUPON:BASE_URL+"coupon/",
-    CREATE_COUPON:BASE_URL+"coupon",
-    //PRODUCT
-    CREATE_PRODUCT:BASE_URL+"product",
-    UPLOAD_IMAGE:BASE_URL+"uploadimages",
-    REMOVE_IMAGE:BASE_URL+"removeimage",
+export const getCurrentUser = (token) =>
+    fetchRequest('current-user', 'POST', token);
 
-    GET_PRODUCT_BY_COUNT:BASE_URL+"products/",
-    GET_PRODUCTS:BASE_URL+"products",
-    GET_REMOVE_UPDATE_COUNT_PRODUCT:BASE_URL+"product/",
-    CREATE_PAYMENT_INTENT:BASE_URL+"create-payment-intent",
+export const getCurrentAdmin = (token) =>
+    fetchRequest('current-admin', 'POST', token);
 
-    
-}
+// Order API
+export const getOrders = () =>
+    fetchRequest('admin/orders', 'GET');
+
+export const changeOrderStatus = (orderId, status) =>
+    fetchRequest('admin/order-status', 'PUT', null, { orderId, status });
+
+// Category API
+export const getCategories = (token) =>
+    fetchRequest('categories', 'GET', token);
+
+export const removeOrUpdateCategory = (categoryId, data, token) =>
+    fetchRequest(`category/${categoryId}`, 'PUT', token, data);
+
+export const removeCategory = (categoryId, token) =>
+    fetchRequest(`category/${categoryId}`, 'DELETE', token);
+
+export const createCategory = (data, token) =>
+    fetchRequest('category', 'POST', token, data);
+
+export const getCategorySub = (categoryId) =>
+    fetchRequest(`category/subs/${categoryId}`, 'GET');
+
+// Subcategory API
+export const getCreateSub = (id = false,token) =>
+    fetchRequest(`sub${id ? `/${id}` : ''}`, 'GET', token);
+
+export const CreateSub = (token,data) =>
+    fetchRequest(`sub`, 'POST', token,data);
+
+export const getRemoveOrUpdateSub = (subId, data, token) =>
+    fetchRequest(`sub/${subId}`, 'PUT', token, data);
+
+export const getUpdateSub = (id, token) =>
+    fetchRequest(`sub/${id}`, 'GET', token);
+
+export const deleteSub = (subId, token) =>
+    fetchRequest(`sub/${subId}`, 'DELETE', token);
+
+// Coupon API
+export const getCoupons = () =>
+    fetchRequest('coupons', 'GET');
+
+export const removeCoupon = (couponId) =>
+    fetchRequest(`coupon/${couponId}`, 'DELETE');
+
+export const createCoupon = (data) =>
+    fetchRequest('coupon', 'POST', null, data);
+
+// Product API
+export const createProduct = (data, token) =>
+    fetchRequest('product', 'POST', token, data);
+
+export const uploadImage = (data, token) =>
+    fetchRequest('uploadimages', 'POST', token, data);
+
+export const removeImage = (imageId, token) =>
+    fetchRequest(`removeimage/${imageId}`, 'DELETE', token);
+
+// Miscellaneous
+export const getProductByCount = (count) =>
+    fetchRequest(`products/${count}`, 'GET');
+
+export const getProducts = (data) =>
+    fetchRequest('products', 'POST', null, data);
+
+export const getRemoveOrUpdateCountProduct = (productId, data,token) =>
+    fetchRequest(`product/${productId}`, 'PUT', token, data);
+
+export const getUpdateCountProduct = (productId) =>
+    fetchRequest(`product/${productId}`, 'GET');
+
+export const createPaymentIntent = (data) =>
+    fetchRequest('create-payment-intent', 'POST', null, data);

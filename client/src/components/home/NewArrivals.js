@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
-import ProductCard from "../cards/ProductCard";
+import ProductCard from "../../screens/product/ProductCard";
 import LoadingCard from "../cards/LoadingCard";
 import {
-  GET_PRODUCTS
+  getProducts
 } from "../../utils/ApiRoute";
-import FetchData from "../../utils/FetchApi";
 const NewArrivals = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -19,11 +18,11 @@ const NewArrivals = () => {
       const [sort,
         order,
         limit,]=["createdAt", "desc", 3]
-      const res = await FetchData(GET_PRODUCTS, "POST",JSON.stringify({
+      const res = await getProducts({
         sort,
         order,
         limit,
-      }),null);
+      });
       setProducts(res.data);
     } catch (error) {
       console.error("Failed to load products:", error);

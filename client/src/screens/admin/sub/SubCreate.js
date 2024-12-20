@@ -5,8 +5,7 @@ import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import CategoryForm from "../../../components/forms/CategoryForm";
 import LocalSearch from "../../../components/forms/LocalSearch";
-import {GET_CATEGORIES,GET_CREATE_SUBS,GET_REMOVE_UPDATE_SUB } from "../../../utils/ApiRoute";
-import FetchData from "../../../utils/FetchApi";
+import {getCategories,getCreateSub,deleteSub,CreateSub,getRemoveOrUpdateSub } from "../../../utils/ApiRoute";
 import ModalPopup from "../../../components/forms/ModalPopup";
 
 const SubCreate = () => {
@@ -27,7 +26,7 @@ const SubCreate = () => {
 
   const loadCategories = async () => {
     try {
-      const res = await FetchData(GET_CATEGORIES, "GET",null, user.token);
+      const res = await getCategories(user.token);
       if (res) {
         setCategories(res.data);
       }
@@ -38,7 +37,7 @@ const SubCreate = () => {
 
   const loadSubs = async () => {
     try {
-      const res = await FetchData(GET_CREATE_SUBS, "GET",null, user.token);
+      const res = await getCreateSub(false,user.token);
       if (res) {
         setSubs(res.data);
       }
@@ -50,8 +49,10 @@ const SubCreate = () => {
   const handleSubmit = async(e) => {
     e.preventDefault();
     setLoading(true);
+    console.log("trginer")
+    // return
     try {
-      const res = await FetchData(GET_CREATE_SUBS, "POST", JSON.stringify({ name, parent: category }), user.token);
+      const res = await CreateSub(user.token,{ name, parent: category });
       if (res) {
         setLoading(false);
         setName("");
@@ -73,7 +74,7 @@ const SubCreate = () => {
     if (window.confirm("Delete?")) {
       setLoading(true);
       try {
-        const res = await FetchData(GET_REMOVE_UPDATE_SUB + slug, "DELETE", null, user.token);
+        const res = await deleteSub(slug,user.token);
         if (res) {
           setLoading(false);
           toast.error(`${res.data.name} deleted`);
@@ -100,12 +101,7 @@ const SubCreate = () => {
   const handleUpdate =async()=>{
     setLoading(true);
     try {
-      const res = await FetchData(
-        GET_REMOVE_UPDATE_SUB + editItem.slug,
-        "PUT",
-        JSON.stringify(editItem),
-        user.token
-      );
+      const res = await getRemoveOrUpdateSub(editItem.slug,editItem,user.token);
       if (res) {
         setLoading(false);
         btnRef.current.click();
@@ -213,8 +209,8 @@ const SubCreate = () => {
             <select
               name="category"
               className="form-control mb-2"
-              onChange={(e) => setEditItem({ ...editItem, parent: e.target.value })}
               value={editItem.parent}
+              onChange={(e) => setEditItem({ ...editItem, parent: e.target.value })}
             >
               <option>select Category</option>
               {categories.length > 0 &&

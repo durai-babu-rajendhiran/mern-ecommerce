@@ -5,14 +5,15 @@ import { useSelector } from "react-redux";
 import ProductCreateForm from "../../../components/forms/ProductCreateForm";
 import FileUpload from "../../../components/forms/FileUpload";
 import {
-  CREATE_PRODUCT,
-  GET_CATEGORIES,
-  GET_CREATE_SUBS,
-  GET_REMOVE_UPDATE_COUNT_PRODUCT,
-  GET_PRODUCT_BY_COUNT,
+  createProduct,
+  getCategories,
+  getCreateSub,
+  getRemoveOrUpdateSub,
+  getUpdateCountProduct,
+  getProductByCount,
+  getRemoveOrUpdateCountProduct,
   BASEURL,
 } from "../../../utils/ApiRoute";
-import FetchData from "../../../utils/FetchApi";
 import ModalPopup from "../../../components/forms/ModalPopup";
 import ProductUpdateForm from "../../../components/forms/ProductUpdateForm";
 
@@ -54,7 +55,7 @@ const ProductCreate = () => {
   const loadAllProducts = async () => {
     try {
       setLoading(true);
-      const res = await FetchData(GET_PRODUCT_BY_COUNT + "100", "GET");
+      const res = await getProductByCount("100");
       setProducts(res.data);
     } catch (error) {
       console.error("Failed to load products:", error);
@@ -65,8 +66,8 @@ const ProductCreate = () => {
 
   const loadCategories = async () => {
     try {
-      const res = await FetchData(GET_CATEGORIES, "GET");
-      setValues((prevValues) => ({ ...prevValues, categories: res.data }));
+      const res = await getCategories();
+      setValues((prevValues) => ({ ...prevValues, categories: res }));
       setCategories(res.data);
     } catch (error) {
       console.error("Failed to load categories:", error);
@@ -76,10 +77,7 @@ const ProductCreate = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await FetchData(
-        CREATE_PRODUCT,
-        "POST",
-        JSON.stringify(values),
+      const res =await createProduct(values,
         user.token
       );
       window.alert(`"${res.data.title}" is created`);
@@ -92,7 +90,7 @@ const ProductCreate = () => {
   };
 
   const handleChange = (e) => {
-    setValues({ ...values, [e.target.name]: e.target.value });
+    setValues({ ...values, [e.target?.name]: e.target.value });
   };
 
   const handleCategoryChange = async (e, isEditMode = false) => {
@@ -102,7 +100,7 @@ const ProductCreate = () => {
     }
     setSelectedCategory(categoryId);
     try {
-      const res = await FetchData(GET_CREATE_SUBS + "/" + categoryId, "GET", null, user.token);
+      const res = await getCreateSub(categoryId,user.token);
       setSubOptions(res.data);
       setShowSub(true);
     } catch (error) {
@@ -114,7 +112,7 @@ const ProductCreate = () => {
     if (window.confirm("Delete?")) {
       try {
         setLoading(true);
-        const res = await FetchData(GET_REMOVE_UPDATE_COUNT_PRODUCT + slug, "DELETE", null, user.token);
+        const res = await getRemoveOrUpdateCountProduct(slug,user.token);
         toast.error(`${res.data.title} deleted`);
         loadAllProducts();
       } catch (err) {
@@ -126,16 +124,14 @@ const ProductCreate = () => {
     }
   };
 
-  const handleEdit = async (slug) => {
+  const handleEdit = async (id) => {
     try {
-      setEditMode(slug);
-      const res = await FetchData(GET_REMOVE_UPDATE_COUNT_PRODUCT + slug, "GET", null, user.token);
-     if(res.data){
-      setValues((prevValues) => ({ ...prevValues, ...res.data }));
-      // setValues(res.data);
-      console.log('Fetched data:', values);
-      handleCategoryChange(res.data.category._id, true);
-      const subIds = res.data.subs.map((sub) => sub._id);
+      setEditMode(id);
+      const res = await getUpdateCountProduct(id,user.token);
+     if(res){
+      setValues((prevValues) => ({ ...prevValues, ...res }));
+      handleCategoryChange(res.data?.category?._id, true);
+      const subIds = res.data.subs.map((sub) => sub?._id);
       setArrayOfSubs(subIds);
      }
     } catch (err) {
@@ -148,7 +144,7 @@ const ProductCreate = () => {
     try {
       values.subs = arrayOfSubs;
       values.category = selectedCategory ? selectedCategory : values.category;
-      const res = await FetchData(GET_REMOVE_UPDATE_COUNT_PRODUCT + editMode, "PUT", JSON.stringify(values), user.token);
+      const res = await getRemoveOrUpdateCountProduct(editMode,values, user.token);
       setLoading(false);
       toast.success(`"${res.data.title}" is updated`);
       window.location.reload();
@@ -205,7 +201,7 @@ const ProductCreate = () => {
                   <tr key={product._id}>
                     <td>{index + 1}</td>
                     <td>{product.title}</td>
-                    <td>{product.category.name}</td>
+                    <td>{product.category?.name}</td>
                     <td>{product.description}</td>
                     <td>{product.price}</td>
                     <td>

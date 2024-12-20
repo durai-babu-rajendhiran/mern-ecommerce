@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Route, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import LoadingToRedirect from "./LoadingToRedirect";
-import {CURRENT_ADMIN} from "../../utils/ApiRoute";
-import FetchData from "../../utils/FetchApi"
+import {getCurrentAdmin} from "../../utils/ApiRoute";
+
 const AdminRoute = (Component) => {
   const { user } = useSelector((state) => ({ ...state }));
   const [ok, setOk] = useState(false);
@@ -12,7 +12,7 @@ const AdminRoute = (Component) => {
     const fetchUserData = async () => {
       if (user && user.token) {
         try {
-          const res = await FetchData(CURRENT_ADMIN, "POST", null, user.token, false);
+          const res = await getCurrentAdmin(user.token);
           if (res) {
             console.log("CURRENT ADMIN RES", res);
             setOk(true);

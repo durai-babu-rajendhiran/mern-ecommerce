@@ -6,8 +6,7 @@ import { useDispatch } from "react-redux";
 import { auth } from "./firebase";
 import UserRoute from "./components/routes/UserRoute";
 import AdminRoute from "./components/routes/AdminRoute";
-import {CURRENT_USER} from "./utils/ApiRoute";
-import FetchData from "./utils/FetchApi"
+import {getCurrentUser} from "./utils/ApiRoute";
 import { onAuthStateChanged } from 'firebase/auth';
 import 'react-loading-skeleton/dist/skeleton.css';
 const Login = React.lazy(() => import("./screens/auth/Login"));
@@ -23,7 +22,7 @@ const AdminDashboard = React.lazy(() => import("./screens/admin/AdminDashboard")
 const Category = React.lazy(() => import("./screens/admin/category/CategoryCreate")) ;
 const Subcategory = React.lazy(() => import("./screens/admin/sub/SubCreate"));
 const ProductCreate = React.lazy(() => import("./screens/admin/product/ProductCreate"));
-const Product = React.lazy(() => import("./screens/Product"));
+const Product = React.lazy(() => import("./screens/product/Product"));
 
 
 function App() {
@@ -34,16 +33,16 @@ function App() {
       if (user) {
         try {
           const idTokenResult = await user.getIdTokenResult();
-          const res = await FetchData(CURRENT_USER, "POST", null, idTokenResult.token, false);
+          const res = await getCurrentUser(idTokenResult.token);
           if (res) {
             dispatch({
               type: "LOGGED_IN_USER",
                payload: {
-                name: res.data.name,
-                email: res.data.email,
+                name: res.name,
+                email: res.email,
                 token: idTokenResult.token,
-                role: res.data.role,
-                _id: res.data._id,
+                role: res.role,
+                _id: res._id,
               },
             });
           }

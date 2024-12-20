@@ -71,10 +71,10 @@ const TabContent = ({ description }) => (
 
 const ActionButtons = () => (
   <div className="action-buttons d-flex justify-content-around my-3">
-    <a href="#" className="btn btn-outline-primary btn-sm">
+    <a href="#" className="btn btn-outline-primary btn-sm my-2 mx-2">
       <i className="fa-solid fa-cart-shopping" /> Add to Cart
     </a>
-    <a href="#" className="btn btn-outline-secondary btn-sm">
+    <a href="#" className="btn btn-outline-secondary btn-sm my-2 mx-2">
       <i className="fa-regular fa-heart" /> Add to Wishlist
     </a>
   </div>
@@ -95,7 +95,7 @@ const SingleProduct = ({ product }) => {
         <TabContent description={description} />
       </div>
       <div className="col-md-5">
-        <div className="card">
+        <div className="">
           <div className="card-body d-flex flex-column align-items-center">
             <div className="icon-wrapper mb-3">
               <div className="card-title fw-bolder h2">{title}</div>

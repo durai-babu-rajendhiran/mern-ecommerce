@@ -2,8 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import AdminNav from "../../../components/nav/AdminNav";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
-import { CREATE_CATEGORY, GET_CATEGORIES, REMOVE_UPDATE_CATEGORY } from "../../../utils/ApiRoute";
-import FetchData from "../../../utils/FetchApi";
+import { createCategory, getCategories, removeOrUpdateCategory,removeCategory } from "../../../utils/ApiRoute";
 import CategoryForm from "../../../components/forms/CategoryForm";
 import LocalSearch from "../../../components/forms/LocalSearch";
 import ModalPopup from "../../../components/forms/ModalPopup";
@@ -23,7 +22,7 @@ const CategoryCreate = () => {
 
   const loadCategories = async () => {
     try {
-      const res = await FetchData(GET_CATEGORIES, "GET");
+      const res = await getCategories();
       if (res) {
         setCategories(res.data);
       }
@@ -38,7 +37,7 @@ const CategoryCreate = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await FetchData(CREATE_CATEGORY, "POST", JSON.stringify({ name }), user.token);
+      const res = await createCategory({ name }, user.token);
       if (res) {
         setLoading(false);
         setName("");
@@ -56,12 +55,7 @@ const CategoryCreate = () => {
   const handleUpdate = async () => {
     setLoading(true);
     try {
-      const res = await FetchData(
-        REMOVE_UPDATE_CATEGORY + editItem.slug,
-        "PUT",
-        JSON.stringify({ name: editItem.name }),
-        user.token
-      );
+      const res = await removeOrUpdateCategory(editItem.slug,{ name: editItem.name },user.token);
       if (res) {
         setLoading(false);
         btnRef.current.click();
@@ -81,7 +75,7 @@ const CategoryCreate = () => {
       setLoading(true);
 
       try {
-        const res = await FetchData(REMOVE_UPDATE_CATEGORY + slug, "DELETE", null, user.token);
+        const res = await removeCategory(slug,user.token);
         if (res) {
           setLoading(false);
           toast.error(`${res.data.name} deleted`);
@@ -123,7 +117,7 @@ const CategoryCreate = () => {
                 </tr>
               </thead>
               <tbody>
-                {categories.filter(searched(keyword)).map((c, index) => (
+                {categories.filter(searched(keyword)).map((c,index) => (
                   <tr key={c._id}>
                     <td>{index + 1}</td>
                     <td>{c.name}</td>

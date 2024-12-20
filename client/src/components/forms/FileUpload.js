@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import FetchData from "../../utils/FetchApi";
-import {UPLOAD_IMAGE,REMOVE_IMAGE,BASEURL} from "../../utils/ApiRoute"
+import {uploadImage,removeImage,BASEURL} from "../../utils/ApiRoute"
 const FileUpload = ({ values, setValues, setLoading }) => {
   const { user } = useSelector((state) => ({ ...state }));
   const resizeImage = (file, maxWidth, maxHeight) => {
@@ -49,8 +48,7 @@ const FileUpload = ({ values, setValues, setLoading }) => {
           const resizedBlob = await resizeImage(selectedFile, 720, 720);
           formData.append("mediaUrls", resizedBlob, selectedFile.name); // Ensure proper naming
       }));
-      // const res = await FetchData(UPLOAD_IMAGE, "POST", formData, user.token, true);
-      const res = await FetchData(UPLOAD_IMAGE, "POST", formData, user.token, true);
+      const res = await uploadImage(formData, user.token);
       if (res) {
         const images = Array.isArray(res.url) ? res.url : [res.url];
 
@@ -71,7 +69,7 @@ const FileUpload = ({ values, setValues, setLoading }) => {
   const handleImageRemove = async (image) => {
     setLoading(true);
     try {
-      const res = await FetchData(REMOVE_IMAGE, "POST", JSON.stringify({image}), user.token, false);
+      const res = await removeImage({image}, user.token);
       if (res) {
         const filteredImages = values.images.filter((item) => item != image);
         setValues({ ...values, images: filteredImages });  

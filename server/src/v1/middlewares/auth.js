@@ -9,8 +9,8 @@ if (!admin.apps.length) {
   });
 }
 exports.authCheck = async (req, res, next) => {
-  // const idToken = req.header['authtoken'];
-  const idToken = req.headers['authtoken'];
+  const idToken = req.headers['authtoken'] || req.headers['Authtoken'];
+  console.log(idToken)
   if (!idToken) {
     return res.status(401).json({ error: "No token provided" });
   }

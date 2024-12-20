@@ -1,0 +1,40 @@
+/* Title Font Style */
+.title-font {
+  font-size: 24px; /* Adjust as needed */
+  font-weight: 400;
+}
+
+/* Paragraph Font Style */
+.para-font {
+  font-size: 16px; /* Adjust as needed */
+  font-weight: normal;
+}
+
+/* Heading Font Styles */
+.heading-1 {
+  font-size: 32px; /* H1 size */
+  font-weight: bold;
+}
+
+.heading-2 {
+  font-size: 28px; /* H2 size */
+  font-weight: bold;
+}
+
+.heading-3 {
+  font-size: 24px; /* H3 size */
+  font-weight: bold;
+}
+
+/* Button Font Style */
+.font-btn {
+  font-size: 13px; 
+  font-weight: 700;
+}
+
+
+.card {
+  min-height: 320px;
+  max-height: 350px;
+  overflow: hidden;
+}

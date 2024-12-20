@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
-import ProductCard from "../cards/ProductCard";
+import ProductCard from "../../screens/product/ProductCard";
 import LoadingCard from "../cards/LoadingCard";
 import {
-  GET_PRODUCTS,
+  getProducts,
   BASEURL,
 } from "../../utils/ApiRoute";
-import FetchData from "../../utils/FetchApi";
 
 const BestSellers = () => {
 
@@ -23,13 +22,13 @@ const BestSellers = () => {
     try {
       setLoading(true);
       const [sort, order, limit] = ["sold", "desc", 3];
-      const res = await FetchData(GET_PRODUCTS, "POST",JSON.stringify({
+      const res = await getProducts({
         sort,
         order,
         limit,
-      }),null);
+      });
       setProducts(res.data);
-      setPaginationInfo(res.pagination || null);
+      setPaginationInfo(res.data.pagination || null);
     } catch (error) {
       console.error("Failed to load products:", error);
     } finally {
@@ -101,7 +100,7 @@ const BestSellers = () => {
         ) : (
           <div className="row">
             {products.map((product) => (
-              <div key={product._id} className="col-md-4">
+              <div key={product._id} className="col-md-6">
                 <ProductCard product={product} />
               </div>
             ))}
