@@ -1,17 +1,54 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { useSelector } from "react-redux";
-
-const RatingModal = ({ children }) => {
+import "./style/rating.css"
+import {
+  productStar
+} from "../../utils/ApiRoute";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+const RatingModal = ({ name, loadSingleProduct,product }) => {
   const { user } = useSelector((state) => ({ ...state }));
-  const [modalVisible, setModalVisible] = useState(false);
-
+  const [rating, setRating] = useState(0); // Current rating
+  const [modalShow, setModalShow] = useState(false);   // Hover state for highlighting
+  const [hover, setHover] = useState(0);   // Hover state for highlighting
+  const navigate = useNavigate()
+  const handleClick = (rate) => {
+    setRating(rate);
+    productStar(name, rate, user.token).then((res) => {
+      if(res){
+        setModalShow(false);
+        loadSingleProduct()
+        toast.success("Thanks for your review. It will apper soon");
+      }
+    });
+  };
+  var totalStars = 5
+  const handleModal = () => {
+    if (user && user.token) {
+      setModalShow(true);
+    } else {
+      navigate("/login", {      });
+    }
+  };
+  useEffect(() => {
+    if (product.ratings && user) {
+      let existingRatingObject = product.ratings.find(
+        (ele) => ele?.postedBy?.toString() == user?._id?.toString()
+      );
+      if(existingRatingObject){
+        setHover(existingRatingObject.star);
+        setRating(existingRatingObject.star); // current user's star
+      }
+    }
+  });
   return (
     <>
-      <div onClick={() => setModalVisible(true)}>
-        {user ? "Leave rating" : "Login to leave rating"}
+      <div onClick={handleModal} className="btn btn-outline-danger mt-3 p-1">
+        <span>&#9733;</span> {" "}
+        {user ? "Leave Rating" : "Login to leave Rating"}
       </div>
       <div
-        className="modal fade"
+        className={`modal fade show ${modalShow?'d-block':'d-none'}`}
         id="exampleModal"
         tabIndex={-1}
         aria-labelledby="exampleModalLabel"
@@ -19,7 +56,38 @@ const RatingModal = ({ children }) => {
       >
         <div className="modal-dialog">
           <div className="modal-content">
-            {children}
+
+          <div className="modal-header">
+              <h1 className="modal-title fs-5" id="exampleModalLabel">
+                Add Ratings
+              </h1>
+              <button
+                type="button"
+                className="btn-close"
+                onClick={()=>setModalShow(false)}
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              />
+            </div>
+            <div className="modal-body">
+            <div className="rating-container">
+      {Array.from({ length: totalStars }, (_, index) => {
+        const starValue = index + 1;
+
+        return (
+          <span
+            key={index}
+            className={`star ${starValue <= (hover || rating) ? 'active' : ''}`}
+            onClick={() => handleClick(starValue)}
+            onMouseEnter={() => setHover(starValue)}
+            onMouseLeave={() => setHover(0)}
+          >
+            &#9733; {/* Unicode star character */}
+          </span>
+        );
+      })}
+    </div>
+          </div>
           </div>
         </div>
         </div>

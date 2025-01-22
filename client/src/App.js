@@ -34,15 +34,16 @@ function App() {
         try {
           const idTokenResult = await user.getIdTokenResult();
           const res = await getCurrentUser(idTokenResult.token);
+          const userItem = res.data
           if (res) {
             dispatch({
               type: "LOGGED_IN_USER",
                payload: {
-                name: res.name,
-                email: res.email,
+                name: userItem.name,
+                email: userItem.email,
                 token: idTokenResult.token,
-                role: res.role,
-                _id: res._id,
+                role: userItem.role,
+                _id: userItem._id,
               },
             });
           }

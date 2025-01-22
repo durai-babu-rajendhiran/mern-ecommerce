@@ -14,7 +14,7 @@ import {
   getRemoveOrUpdateCountProduct,
   BASEURL,
 } from "../../../utils/ApiRoute";
-import ModalPopup from "../../../components/forms/ModalPopup";
+import ModalPopup from "../../../components/modal/ModalPopup";
 import ProductUpdateForm from "../../../components/forms/ProductUpdateForm";
 
 const initialState = {

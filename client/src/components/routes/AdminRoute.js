@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Route, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import LoadingToRedirect from "./LoadingToRedirect";
 import {getCurrentAdmin} from "../../utils/ApiRoute";

@@ -3,6 +3,8 @@ import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import { BASEURL } from '../../utils/ApiRoute';
 import ProductListItems from './ProductListItems';
+import RatingModal from '../../components/modal/RatingModal';
+import { showAverage } from './Function';
 
 const ImageCarousel = ({ images }) => (
   <Carousel showArrows autoPlay infiniteLoop>
@@ -69,20 +71,9 @@ const TabContent = ({ description }) => (
   </div>
 );
 
-const ActionButtons = () => (
-  <div className="action-buttons d-flex justify-content-around my-3">
-    <a href="#" className="btn btn-outline-primary btn-sm my-2 mx-2">
-      <i className="fa-solid fa-cart-shopping" /> Add to Cart
-    </a>
-    <a href="#" className="btn btn-outline-secondary btn-sm my-2 mx-2">
-      <i className="fa-regular fa-heart" /> Add to Wishlist
-    </a>
-  </div>
-);
 
-const SingleProduct = ({ product }) => {
-  const { title, description, images } = product;
-
+const SingleProduct = ({ product, loadSingleProduct }) => {
+  const { title, images, description, _id } = product;
   return (
     <>
       <div className="col-md-7">
@@ -101,7 +92,18 @@ const SingleProduct = ({ product }) => {
               <div className="card-title fw-bolder h2">{title}</div>
             </div>
             <ProductListItems product={product} />
-            <ActionButtons />
+            {product && product.ratings && product.ratings.length > 0
+              ? showAverage(product)
+              : "No rating yet"}
+            <RatingModal name={_id} loadSingleProduct={() => loadSingleProduct()} product={product}/>
+            <div className="action-buttons d-flex justify-content-around my-3">
+              <a href="#" className="btn btn-outline-primary btn-sm my-2 mx-2">
+                <i className="fa-solid fa-cart-shopping" /> Add to Cart
+              </a>
+              <a href="#" className="btn btn-outline-secondary btn-sm my-2 mx-2">
+                <i className="fa-regular fa-heart" /> Add to Wishlist
+              </a>
+            </div>
           </div>
         </div>
       </div>

@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import { createCategory, getCategories, removeOrUpdateCategory,removeCategory } from "../../../utils/ApiRoute";
 import CategoryForm from "../../../components/forms/CategoryForm";
 import LocalSearch from "../../../components/forms/LocalSearch";
-import ModalPopup from "../../../components/forms/ModalPopup";
+import ModalPopup from "../../../components/modal/ModalPopup";
 
 const CategoryCreate = () => {
   const { user } = useSelector((state) => ({ ...state }));

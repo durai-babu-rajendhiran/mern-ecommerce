@@ -85,13 +85,7 @@ export const createCoupon = (data) =>
 export const createProduct = (data, token) =>
     fetchRequest('product', 'POST', token, data);
 
-export const uploadImage = (data, token) =>
-    fetchRequest('uploadimages', 'POST', token, data);
 
-export const removeImage = (imageId, token) =>
-    fetchRequest(`removeimage/${imageId}`, 'DELETE', token);
-
-// Miscellaneous
 export const getProductByCount = (count) =>
     fetchRequest(`products/${count}`, 'GET');
 
@@ -104,5 +98,16 @@ export const getRemoveOrUpdateCountProduct = (productId, data,token) =>
 export const getUpdateCountProduct = (productId) =>
     fetchRequest(`product/${productId}`, 'GET');
 
+export const productStar = (productId, star, token) =>
+    fetchRequest(`/product/star/${productId}`,'PUT',token,{ star })
+
+
 export const createPaymentIntent = (data) =>
     fetchRequest('create-payment-intent', 'POST', null, data);
+
+// image Upload
+export const uploadImage = (data, token) =>
+    fetchRequest('uploadimages', 'POST', token, data);
+
+export const removeImage = (imageId, token) =>
+    fetchRequest(`removeimage/${imageId}`, 'DELETE', token);

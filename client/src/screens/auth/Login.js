@@ -34,7 +34,6 @@ const Login = () => {
       const { user } = result;
       const idTokenResult = await user.getIdTokenResult();
       const res = await createUser(idTokenResult.token);
-      console.log(res)
       dispatch({
         type: "LOGGED_IN_USER",
         payload: {

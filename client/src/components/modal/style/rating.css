@@ -1,0 +1,21 @@
+.rating-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .star {
+    font-size: 2rem;
+    color: #ccc;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  
+  .star.active {
+    color: #ffd700; /* Gold color for active stars */
+  }
+  
+  .star:hover {
+    color: #ff9f00; /* Highlight color on hover */
+  }
+  

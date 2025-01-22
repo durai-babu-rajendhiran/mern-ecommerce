@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import CategoryForm from "../../../components/forms/CategoryForm";
 import LocalSearch from "../../../components/forms/LocalSearch";
 import {getCategories,getCreateSub,deleteSub,CreateSub,getRemoveOrUpdateSub } from "../../../utils/ApiRoute";
-import ModalPopup from "../../../components/forms/ModalPopup";
+import ModalPopup from "../../../components/modal/ModalPopup";
 
 const SubCreate = () => {
   const { user } = useSelector((state) => ({ ...state }));
