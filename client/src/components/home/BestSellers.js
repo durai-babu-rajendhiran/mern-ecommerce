@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import ProductCard from "../../screens/product/ProductCard";
+import ProductCard from "../cards/ProductCard";
 import LoadingCard from "../cards/LoadingCard";
 import {
   getProducts,

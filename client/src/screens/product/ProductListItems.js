@@ -36,14 +36,14 @@ const ProductListItems = ({ product }) => {
 
       {subs && (
         <li className="list-group-item">
-          Sub Categories
+          Sub Categories {" "}
           {subs.map((s) => (
             <Link
               key={s._id}
-              to={`/sub/${s.slug}`}
+              // to={`/sub/${s.slug}`}
               className="label label-default label-pill pull-xs-right"
             >
-              {s.name}
+              {s.name} {" "}
             </Link>
           ))}
         </li>

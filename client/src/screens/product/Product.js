@@ -10,6 +10,7 @@ const Product = () => {
   const [product, setProduct] = useState({});
   const { slug } = useParams();
   useEffect(() => {
+    console.log(slug)
     loadSingleProduct(slug); // Pass the slug to the function
   }, [slug]);
 

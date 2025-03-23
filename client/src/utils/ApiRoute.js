@@ -32,8 +32,12 @@ export const getCurrentUser = (token) =>
 export const getCurrentAdmin = (token) =>
     fetchRequest('current-admin', 'POST', token);
 
-// Order API
+export const userCart = (cart,token) =>
+    fetchRequest('/user/cart', 'POST', token,cart);
+
 export const getOrders = () =>
+    fetchRequest('admin/orders', 'GET');
+export const getCategory = () =>
     fetchRequest('admin/orders', 'GET');
 
 export const changeOrderStatus = (orderId, status) =>

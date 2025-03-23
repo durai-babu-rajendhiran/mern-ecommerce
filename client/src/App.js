@@ -23,7 +23,9 @@ const Category = React.lazy(() => import("./screens/admin/category/CategoryCreat
 const Subcategory = React.lazy(() => import("./screens/admin/sub/SubCreate"));
 const ProductCreate = React.lazy(() => import("./screens/admin/product/ProductCreate"));
 const Product = React.lazy(() => import("./screens/product/Product"));
-
+const CategoryHome = React.lazy(() => import("./screens/category/CategoryHome"));
+const SideDrawer = React.lazy(() => import("./components/drawer/SideDrawer"));
+const Cart = React.lazy(() => import("./screens/Cart"));
 
 function App() {
   const dispatch = useDispatch();
@@ -54,28 +56,36 @@ function App() {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [dispatch]);
 
   const routes = [
       { path:"/" , element:<Home />},
       { path:"/login" , element:<Login />},
       { path:"/register" , element:<Register />},
+      { path:"/forgot/password", element:<ForgotPassword/>},
       { path:"/register/complete" , element:<RegisterComplete />},
-      { path:"/forgot/password", element:ForgotPassword},
+      { path:"/product/:slug", element:<Product/>},
+      { path:"/category/:slug", element:<Product/>},
+      { path:"/sub/:slug", element:<Product/>},
+      { path:"/shop", element:<Product/>},
+      { path:"/cart", element:<Cart />},
+      { path:"/checkout", element:UserRoute(History)},
+      { path:"/payment", element:UserRoute(History)},
       { path:"/user/history", element:UserRoute(History)},
       { path:"/user/password", element:UserRoute(Password)},
       { path:"/user/wishlist", element:UserRoute(Wishlist)},
-      { path:"/product/:slug", element:UserRoute(Product)},
       { path:"/admin/dashboard", element:AdminRoute(AdminDashboard)},
       { path:"/admin/category", element:AdminRoute(Category)},
       { path:"/admin/sub", element:AdminRoute(Subcategory)},
       { path:"/admin/products", element:AdminRoute(ProductCreate)},
+      { path:"/admin/coupon", element:AdminRoute(ProductCreate)},
      ]
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <Header />
       <ToastContainer />
+      <SideDrawer/>
       <Routes>
       {routes.map((route, index) => (
         <Route key={index} path={route.path} element={route.element} />

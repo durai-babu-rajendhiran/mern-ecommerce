@@ -72,7 +72,11 @@ const TabContent = ({ description }) => (
 );
 
 
-const SingleProduct = ({ product, loadSingleProduct }) => {
+const SingleProduct = ({ product = {}, loadSingleProduct }) => {
+  if (!product) {
+    return <div>Loading...</div>;  // or any other fallback UI
+  }
+
   const { title, images, description, _id } = product;
   return (
     <>
