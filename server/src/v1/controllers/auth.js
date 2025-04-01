@@ -1,4 +1,5 @@
 const User = require("../models/user");
+const responseHandlier = require('../utils/status');
 
 exports.createOrUpdateUser = async (req, res) => {
   const { name, picture, email } = req.user;
@@ -10,22 +11,23 @@ exports.createOrUpdateUser = async (req, res) => {
   );
   if (user) {
     console.log("USER UPDATED", user);
-    res.json(user);
+         return responseHandlier.successResponse(user, res);
+    
   } else {
     const newUser = await new User({
       email,
       name: email.split("@")[0],
       picture,
     }).save();
-    console.log("USER CREATED", newUser);
-    res.json({data:newUser});
+    return responseHandlier.successResponse(newUser, res);
+
   }
 };
 
 exports.currentUser = async (req, res) => {
   try{
     const UserData = await User.findOne({ email: req.user.email }).exec();
-     res.json({data:UserData});
+     return responseHandlier.successResponse(UserData, res);
 }catch(err){
   res.json(err);
 }

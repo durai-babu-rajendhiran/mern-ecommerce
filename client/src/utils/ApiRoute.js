@@ -82,8 +82,8 @@ export const getCoupons = () =>
 export const removeCoupon = (couponId) =>
     fetchRequest(`coupon/${couponId}`, 'DELETE');
 
-export const createCoupon = (data) =>
-    fetchRequest('coupon', 'POST', null, data);
+export const createCoupon = (data,token) =>
+    fetchRequest('coupon', 'POST', token, data);
 
 // Product API
 export const createProduct = (data, token) =>
@@ -105,6 +105,9 @@ export const getUpdateCountProduct = (productId) =>
 export const productStar = (productId, star, token) =>
     fetchRequest(`/product/star/${productId}`,'PUT',token,{ star })
 
+export const fetchProductsByFilter = (arg) =>
+    fetchRequest(`/search/filters`,'POST',null,arg)
+
 
 export const createPaymentIntent = (data) =>
     fetchRequest('create-payment-intent', 'POST', null, data);
@@ -115,3 +118,40 @@ export const uploadImage = (data, token) =>
 
 export const removeImage = (imageId, token) =>
     fetchRequest(`removeimage/${imageId}`, 'DELETE', token);
+
+
+//Admin
+export const changeStatus = (orderId, orderStatus, token) =>
+    fetchRequest(`admin/order-status`, 'PUT', token,{ orderId, orderStatus });
+
+export const getUserOrders = (token) =>
+    fetchRequest(`user/orders`, 'GET', token,null);
+
+
+export const getWishlist = (token) =>
+    fetchRequest(`user/wishlist`, 'GET', token,null);
+  
+export const removeWishlist = (productId, token) =>
+    fetchRequest(`user/wishlist/${productId}`, 'PUT', token,null);
+  
+export const addToWishlist = (productId, token) =>
+    fetchRequest(`user/wishlist`, 'POST', token,{productId});
+  
+export const getUserCart = (token) =>
+    fetchRequest(`user/cart`, 'GET', token,null);
+  
+  
+export const emptyUserCart = (token) =>
+    fetchRequest(`user/cart`, 'DELETE', token,null);
+
+export const saveUserAddress = (token,address) =>
+    fetchRequest(`user/address`, 'post', token,{ address });
+
+
+export const applyCoupon = (token,coupon) =>
+    fetchRequest(`user/cart/coupon`, 'post', token,{ coupon });
+
+export const createCashOrderForUser = (token,
+    COD,
+    couponTrueOrFalse ) =>
+    fetchRequest(`user/cash-order`, 'POST', token, { couponApplied: couponTrueOrFalse, COD });

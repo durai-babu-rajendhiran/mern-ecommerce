@@ -1,5 +1,4 @@
 import React from "react";
-import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import ShowPaymentInfo from "../cards/ShowPaymentInfo";
 
 const Orders = ({ orders, handleStatusChange }) => {
@@ -17,7 +16,7 @@ const Orders = ({ orders, handleStatusChange }) => {
       </thead>
 
       <tbody>
-        {order.products.map((p, i) => (
+        {order.products && order.products.map((p, i) => (
           <tr key={i}>
             <td>
               <b>{p.product.title}</b>
@@ -27,12 +26,12 @@ const Orders = ({ orders, handleStatusChange }) => {
             <td>{p.color}</td>
             <td>{p.count}</td>
             <td>
-              {p.product.shipping === "Yes" ? (
-                <CheckCircleOutlined style={{ color: "green" }} />
-              ) : (
-                <CloseCircleOutlined style={{ color: "red" }} />
-              )}
-            </td>
+  {p.product.shipping === "Yes" ? (
+    <i className="fas fa-check-circle" style={{ color: "green" }}></i>
+  ) : (
+    <i className="fas fa-times-circle" style={{ color: "red" }}></i>
+  )}
+</td>
           </tr>
         ))}
       </tbody>
@@ -41,7 +40,7 @@ const Orders = ({ orders, handleStatusChange }) => {
 
   return (
     <>
-      {orders.map((order) => (
+      {orders && orders.map((order) => (
         <div key={order._id} className="row pb-5">
           <div className="btn btn-block bg-light">
             <ShowPaymentInfo order={order} showStatus={false} />

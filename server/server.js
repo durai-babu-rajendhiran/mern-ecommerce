@@ -18,7 +18,6 @@ app.use(morgan("dev"));
 app.use(bodyParser.json({ limit: "2mb" }));
 app.use(cors());
 
-// routes middleware
 readdirSync("./src/v1/routes").map((r) =>app.use("/api/", require("./src/v1/routes/" + r)));
 
 // port

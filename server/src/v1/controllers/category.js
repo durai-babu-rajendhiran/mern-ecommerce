@@ -1,11 +1,12 @@
 const Category = require("../models/category");
 const slugify = require("slugify");
+const responseHandlier = require('../utils/status');
 
 exports.create = async (req, res) => {
   try {
     const { name } = req.body;
     const category = await new Category({ name, slug: slugify(name) }).save();
-    res.json({data:category});
+    return responseHandlier.successResponse(category, res);    
   } catch (err) {
     res.status(400).send("Create category failed");
   }
@@ -23,8 +24,8 @@ exports.read = async (req, res) => {
   });
 };
 
-exports.list = async (req, res) =>
-  res.json({data:await Category.find({}).sort({ createdAt: -1 }).exec()});
+exports.list = async (req, res) =>  responseHandlier.successResponse(await Category.find({}).sort({ createdAt: -1 }).exec(), res);    
+
 
 exports.update = async (req, res) => {
   const { name } = req.body;
@@ -34,7 +35,8 @@ exports.update = async (req, res) => {
       { name, slug: slugify(name) },
       { new: true }
     );
-    res.json({data:updated});
+    return responseHandlier.successResponse(updated, res);    
+
   } catch (err) {
     res.status(400).send("Create update failed");
   }
@@ -43,7 +45,7 @@ exports.update = async (req, res) => {
 exports.remove = async (req, res) => {
   try {
     const deleted = await Category.findOneAndDelete({ slug: req.params.slug });
-    res.json({data:deleted});
+    return responseHandlier.successResponse(deleted, res);    
   } catch (err) {
     res.status(400).send("Create delete failed");
   }

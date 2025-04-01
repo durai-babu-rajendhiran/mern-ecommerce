@@ -37,7 +37,7 @@ const Password = () => {
           value={password}
         />
         <button
-          className="btn btn-primary"
+          className="btn btn-primary mt-3"
           disabled={!password || password.length < 6 || loading}
         >
           Submit

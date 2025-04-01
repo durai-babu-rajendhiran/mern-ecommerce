@@ -1,13 +1,15 @@
 const Product = require("../models/product");
 const User = require("../models/user");
 const slugify = require("slugify");
+const responseHandlier = require('../utils/status');
 
 exports.create = async (req, res) => {
   try {
     console.log(req.body);
     req.body.slug = slugify(req.body.title);
     const newProduct = await new Product(req.body).save();
-    res.json({ data: newProduct });
+      return responseHandlier.successResponse(newProduct, res);    
+    
   } catch (err) {
     console.log(err);
     // res.status(400).send("Create product failed");
@@ -24,7 +26,8 @@ exports.listAll = async (req, res) => {
     .populate("subs")
     .sort([["createdAt", "desc"]])
     .exec();
-  res.json({ data: products });
+    return responseHandlier.successResponse(products, res);    
+
 };
 
 exports.remove = async (req, res) => {
@@ -32,7 +35,8 @@ exports.remove = async (req, res) => {
     const deleted = await Product.findOneAndDelete({
       slug: req.params.slug,
     }).exec();
-    res.json({ data: deleted });
+    return responseHandlier.successResponse(deleted, res);    
+
   } catch (err) {
     console.log(err);
     return res.status(400).send("Product delete failed");
@@ -44,7 +48,8 @@ exports.read = async (req, res) => {
     .populate("category")
     .populate("subs")
     .exec();
-  res.json({ data: product });
+    return responseHandlier.successResponse(product, res);    
+
 };
 
 exports.update = async (req, res) => {
@@ -57,7 +62,8 @@ exports.update = async (req, res) => {
       req.body,
       { new: true }
     ).exec();
-    res.json({ data: updated });
+    return responseHandlier.successResponse(updated, res);    
+
   } catch (err) {
     console.log("PRODUCT UPDATE ERROR ----> ", err);
     // return res.status(400).send("Product update failed");
@@ -113,8 +119,8 @@ exports.productStar = async (req, res) => {
       },
       { new: true }
     ).exec();
-    console.log("ratingAdded", ratingAdded);
-    res.json({ data: ratingAdded });
+    return responseHandlier.successResponse(ratingAdded, res);    
+
   } else {
     const ratingUpdated = await Product.updateOne(
       {
@@ -123,8 +129,8 @@ exports.productStar = async (req, res) => {
       { $set: { "ratings.$.star": star } },
       { new: true }
     ).exec();
-    console.log("ratingUpdated", ratingUpdated);
-    res.json({ data: ratingUpdated });
+    return responseHandlier.successResponse(ratingUpdated, res);    
+
   }
 };
 
@@ -140,10 +146,10 @@ exports.listRelated = async (req, res) => {
     .limit(3)
     .populate("category")
     .populate("subs")
-    .populate("postedBy")
+    .populate("ratings.postedBy")
     .exec();
+    return responseHandlier.successResponse(related, res);    
 
-  res.json(related);
 };
 
 // SERACH / FILTER
@@ -152,10 +158,10 @@ const handleQuery = async (req, res, query) => {
   const products = await Product.find({ $text: { $search: query } })
     .populate("category", "_id name")
     .populate("subs", "_id name")
-    .populate("postedBy", "_id name")
+    .populate("ratings.postedBy", "_id name")
     .exec();
+    return responseHandlier.successResponse(products, res);    
 
-  res.json(products);
 };
 
 const handlePrice = async (req, res, price) => {
@@ -168,10 +174,10 @@ const handlePrice = async (req, res, price) => {
     })
       .populate("category", "_id name")
       .populate("subs", "_id name")
-      .populate("postedBy", "_id name")
+      .populate("ratings.postedBy", "_id name")
       .exec();
+      return responseHandlier.successResponse(products, res);    
 
-    res.json(products);
   } catch (err) {
     console.log(err);
   }
@@ -182,80 +188,82 @@ const handleCategory = async (req, res, category) => {
     let products = await Product.find({ category })
       .populate("category", "_id name")
       .populate("subs", "_id name")
-      .populate("postedBy", "_id name")
+      .populate("ratings.postedBy", "_id name")
       .exec();
+      return responseHandlier.successResponse(products, res);    
 
-    res.json(products);
   } catch (err) {
     console.log(err);
   }
 };
 
-const handleStar = (req, res, stars) => {
-  Product.aggregate([
-    {
-      $project: {
-        document: "$$ROOT",
-        // title: "$title",
-        floorAverage: {
-          $floor: { $avg: "$ratings.star" }, // floor value of 3.33 will be 3
+const handleStar = async (req, res, stars) => {
+  try {
+    // Using aggregate to project the floor average of ratings
+    const aggregates = await Product.aggregate([
+      {
+        $project: {
+          document: "$$ROOT",
+          floorAverage: {
+            $floor: { $avg: "$ratings.star" }, // floor value of 3.33 will be 3
+          },
         },
       },
-    },
-    { $match: { floorAverage: stars } },
-  ])
-    .limit(12)
-    .exec((err, aggregates) => {
-      if (err) console.log("AGGREGATE ERROR", err);
-      Product.find({ _id: aggregates })
-        .populate("category", "_id name")
-        .populate("subs", "_id name")
-        .populate("postedBy", "_id name")
-        .exec((err, products) => {
-          if (err) console.log("PRODUCT AGGREGATE ERROR", err);
-          res.json(products);
-        });
-    });
-};
+      { $match: { floorAverage: stars } },
+    ]).limit(12); // limit the number of results
 
+    const productIds = aggregates.map(agg => agg.document._id); // Extracting product IDs from the aggregates
+
+    // Now use the product IDs to find matching products
+    const products = await Product.find({ _id: { $in: productIds } })
+      .populate("category", "_id name")
+      .populate("subs", "_id name")
+      .populate("ratings.postedBy", "_id name");
+      return responseHandlier.successResponse(products, res);    
+
+  } catch (err) {
+    console.log("AGGREGATE ERROR", err);
+    res.status(400).json({ error: err.message });
+  }
+};
 const handleSub = async (req, res, sub) => {
   const products = await Product.find({ subs: sub })
     .populate("category", "_id name")
     .populate("subs", "_id name")
-    .populate("postedBy", "_id name")
+    .populate("ratings.postedBy", "_id name")
     .exec();
+    return responseHandlier.successResponse(products, res);    
 
-  res.json(products);
 };
 
 const handleShipping = async (req, res, shipping) => {
   const products = await Product.find({ shipping })
     .populate("category", "_id name")
     .populate("subs", "_id name")
-    .populate("postedBy", "_id name")
+    .populate("ratings.postedBy", "_id name")
     .exec();
+    return responseHandlier.successResponse(products, res);    
 
-  res.json(products);
 };
 
 const handleColor = async (req, res, color) => {
   const products = await Product.find({ color })
     .populate("category", "_id name")
     .populate("subs", "_id name")
-    .populate("postedBy", "_id name")
+    .populate("ratings.postedBy", "_id name")
     .exec();
+    return responseHandlier.successResponse(products, res);    
 
-  res.json(products);
 };
 
 const handleBrand = async (req, res, brand) => {
   const products = await Product.find({ brand })
     .populate("category", "_id name")
     .populate("subs", "_id name")
-    .populate("postedBy", "_id name")
+    .populate("ratings.postedBy", "_id name")
     .exec();
+    return responseHandlier.successResponse(products, res);    
 
-  res.json(products);
 };
 
 exports.searchFilters = async (req, res) => {

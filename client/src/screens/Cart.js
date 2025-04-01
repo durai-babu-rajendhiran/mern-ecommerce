@@ -3,11 +3,11 @@ import { useSelector, useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import ProductCardInCheckout from "../components/cards/ProductCardInCheckout";
 import { userCart } from "../utils/ApiRoute";
-
-const Cart = ({ history }) => {
+import { useNavigate } from "react-router-dom";
+const Cart = () => {
   const { cart, user } = useSelector((state) => ({ ...state }));
   const dispatch = useDispatch();
-
+const navigate = useNavigate()
   const getTotal = () => {
     return cart.reduce((currentValue, nextValue) => {
       return currentValue + nextValue.count * nextValue.price;
@@ -19,7 +19,7 @@ const Cart = ({ history }) => {
     userCart(cart, user.token)
       .then((res) => {
         console.log("CART POST RES", res);
-        if (res.data.ok) history.push("/checkout");
+        if (res.ok) navigate("/checkout");
       })
       .catch((err) => console.log("cart save err", err));
   };
@@ -33,7 +33,7 @@ const Cart = ({ history }) => {
     userCart(cart, user.token)
       .then((res) => {
         console.log("CART POST RES", res);
-        if (res.data.ok) history.push("/checkout");
+        if (res.ok) navigate("/checkout");
       })
       .catch((err) => console.log("cart save err", err));
   };

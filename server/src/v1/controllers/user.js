@@ -7,7 +7,7 @@ const uniqueid = require("uniqueid");
 
 exports.userCart = async (req, res) => {
   // console.log(req.body); // {cart: []}
-  const { cart } = req.body;
+  const cart = req.body;
 
   let products = [];
 
@@ -17,8 +17,7 @@ exports.userCart = async (req, res) => {
   let cartExistByThisUser = await Cart.findOne({ orderdBy: user._id }).exec();
 
   if (cartExistByThisUser) {
-    cartExistByThisUser.remove();
-    console.log("removed old cart");
+    await Cart.deleteOne({ _id: cartExistByThisUser._id }); // Use deleteOne()
   }
 
   for (let i = 0; i < cart?.length; i++) {
@@ -32,7 +31,6 @@ exports.userCart = async (req, res) => {
       .select("price")
       .exec();
     object.price = productFromDb.price;
-
     products.push(object);
   }
 
@@ -43,7 +41,6 @@ exports.userCart = async (req, res) => {
     cartTotal = cartTotal + products[i].price * products[i].count;
   }
 
-  // console.log("cartTotal", cartTotal);
 
   let newCart = await new Cart({
     products,
@@ -51,7 +48,6 @@ exports.userCart = async (req, res) => {
     orderdBy: user._id,
   }).save();
 
-  console.log("new cart ----> ", newCart);
   res.json({ ok: true });
 };
 
@@ -159,7 +155,7 @@ exports.orders = async (req, res) => {
     .populate("products.product")
     .exec();
 
-  res.json(userOrders);
+  res.json({data:userOrders});
 };
 
 // addToWishlist wishlist removeFromWishlist
@@ -180,7 +176,7 @@ exports.wishlist = async (req, res) => {
     .populate("wishlist")
     .exec();
 
-  res.json(list);
+  res.json({data:list});
 };
 
 exports.removeFromWishlist = async (req, res) => {

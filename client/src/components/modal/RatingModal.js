@@ -6,10 +6,9 @@ import {
 } from "../../utils/ApiRoute";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-const RatingModal = ({ name, loadSingleProduct,product }) => {
+const RatingModal = ({ name, modalShow, setModalShow, loadSingleProduct, product }) => {
   const { user } = useSelector((state) => ({ ...state }));
   const [rating, setRating] = useState(0); // Current rating
-  const [modalShow, setModalShow] = useState(false);   // Hover state for highlighting
   const [hover, setHover] = useState(0);   // Hover state for highlighting
   const navigate = useNavigate()
   const handleClick = (rate) => {
@@ -23,13 +22,6 @@ const RatingModal = ({ name, loadSingleProduct,product }) => {
     });
   };
   var totalStars = 5
-  const handleModal = () => {
-    if (user && user.token) {
-      setModalShow(true);
-    } else {
-      navigate("/login", {      });
-    }
-  };
   useEffect(() => {
     if (product.ratings && user) {
       let existingRatingObject = product.ratings.find(
@@ -40,13 +32,9 @@ const RatingModal = ({ name, loadSingleProduct,product }) => {
         setRating(existingRatingObject.star); // current user's star
       }
     }
-  });
+  },[product.ratings]);
   return (
     <>
-      <div onClick={handleModal} className="btn btn-outline-danger mt-3 p-1">
-        <span>&#9733;</span> {" "}
-        {user ? "Leave Rating" : "Login to leave Rating"}
-      </div>
       <div
         className={`modal fade show ${modalShow?'d-block':'d-none'}`}
         id="exampleModal"

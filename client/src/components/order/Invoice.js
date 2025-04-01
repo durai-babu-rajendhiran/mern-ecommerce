@@ -1,120 +1,58 @@
 import React from "react";
-import { Document, Page, Text, StyleSheet } from "@react-pdf/renderer";
-import {
-  Table,
-  TableHeader,
-  TableCell,
-  TableBody,
-  DataTableCell,
-} from "@david.kucsai/react-pdf-table";
 
 const Invoice = ({ order }) => (
-  <Document>
-    <Page style={styles.body}>
-      <Text style={styles.header} fixed>
-        ~ {new Date().toLocaleString()} ~
-      </Text>
-      <Text style={styles.title}>Order Invoice</Text>
-      <Text style={styles.author}>React Redux Ecommerce</Text>
-      <Text style={styles.subtitle}>Order Summary</Text>
+  <div className="container my-4">
+    <div className="text-center mb-4">
+      <h6 className="text-muted">~ {new Date().toLocaleString()} ~</h6>
+      <h2 className="fw-bold">Order Invoice</h2>
+      <p className="text-muted">React Redux Ecommerce</p>
+      <h4 className="mt-4">Order Summary</h4>
+    </div>
 
-      <Table>
-        <TableHeader>
-          <TableCell>Title</TableCell>
-          <TableCell>Price</TableCell>
-          <TableCell>Quantity</TableCell>
-          <TableCell>Brand</TableCell>
-          <TableCell>Color</TableCell>
-        </TableHeader>
-      </Table>
+    <div className="table-responsive">
+      <table className="table table-bordered table-hover">
+        <thead className="table-dark">
+          <tr>
+            <th>Title</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Brand</th>
+            <th>Color</th>
+          </tr>
+        </thead>
+        <tbody>
+          {order.products.map((item, index) => (
+            <tr key={index}>
+              <td>{item.product.title}</td>
+              <td>${item.product.price}</td>
+              <td>{item.count}</td>
+              <td>{item.product.brand}</td>
+              <td>{item.product.color}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
 
-      <Table data={order.products}>
-        <TableBody>
-          <DataTableCell getContent={(x) => x.product.title} />
-          <DataTableCell getContent={(x) => `$${x.product.price}`} />
-          <DataTableCell getContent={(x) => x.count} />
-          <DataTableCell getContent={(x) => x.product.brand} />
-          <DataTableCell getContent={(x) => x.product.color} />
-        </TableBody>
-      </Table>
+    <div className="mt-4">
+      <p>
+        <strong>Date:</strong> {new Date(order.paymentIntent.created * 1000).toLocaleString()}
+      </p>
+      <p>
+        <strong>Order Id:</strong> {order.paymentIntent.id}
+      </p>
+      <p>
+        <strong>Order Status:</strong> {order.orderStatus}
+      </p>
+      <p>
+        <strong>Total Paid:</strong> ${order.paymentIntent.amount}
+      </p>
+    </div>
 
-      <Text style={styles.text}>
-        <Text>
-          Date: {"               "}
-          {new Date(order.paymentIntent.created * 1000).toLocaleString()}
-        </Text>
-        {"\n"}
-        <Text>
-          Order Id: {"         "}
-          {order.paymentIntent.id}
-        </Text>
-        {"\n"}
-        <Text>
-          Order Status: {"  "}
-          {order.orderStatus}
-        </Text>
-        {"\n"}
-        <Text>
-          Total Paid: {"       "}
-          {order.paymentIntent.amount}
-        </Text>
-      </Text>
-
-      <Text style={styles.footer}> ~ Thank you for shopping with us ~ </Text>
-    </Page>
-  </Document>
+    <div className="text-center mt-5">
+      <p className="text-muted">~ Thank you for shopping with us ~</p>
+    </div>
+  </div>
 );
-
-const styles = StyleSheet.create({
-  body: {
-    paddingTop: 35,
-    paddingBottom: 65,
-    paddingHorizontal: 35,
-  },
-  title: {
-    fontSize: 24,
-    textAlign: "center",
-  },
-  author: {
-    fontSize: 12,
-    textAlign: "center",
-    marginBottom: 40,
-  },
-  subtitle: {
-    fontSize: 18,
-    margin: 12,
-  },
-  text: {
-    margin: 12,
-    fontSize: 14,
-    textAlign: "justify",
-  },
-  image: {
-    marginVertical: 15,
-    marginHorizontal: 100,
-  },
-  header: {
-    fontSize: 12,
-    marginBottom: 20,
-    textAlign: "center",
-    color: "grey",
-  },
-  footer: {
-    padding: "100px",
-    fontSize: 12,
-    marginBottom: 20,
-    textAlign: "center",
-    color: "grey",
-  },
-  pageNumber: {
-    position: "absolute",
-    fontSize: 12,
-    bottom: 30,
-    left: 0,
-    right: 0,
-    textAlign: "center",
-    color: "grey",
-  },
-});
 
 export default Invoice;

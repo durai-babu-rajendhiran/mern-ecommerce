@@ -26,7 +26,9 @@ const Product = React.lazy(() => import("./screens/product/Product"));
 const CategoryHome = React.lazy(() => import("./screens/category/CategoryHome"));
 const SideDrawer = React.lazy(() => import("./components/drawer/SideDrawer"));
 const Cart = React.lazy(() => import("./screens/Cart"));
-
+const Shop = React.lazy(() => import("./screens/Shop"));
+const Checkout = React.lazy(() => import("./screens/Checkout"));
+const CreateCouponPage = React.lazy(() =>import("./screens/admin/coupon/CreateCouponPage"));
 function App() {
   const dispatch = useDispatch();
 
@@ -67,9 +69,9 @@ function App() {
       { path:"/product/:slug", element:<Product/>},
       { path:"/category/:slug", element:<Product/>},
       { path:"/sub/:slug", element:<Product/>},
-      { path:"/shop", element:<Product/>},
+      { path:"/shop", element:<Shop/>},
       { path:"/cart", element:<Cart />},
-      { path:"/checkout", element:UserRoute(History)},
+      { path:"/checkout", element:UserRoute(Checkout)},
       { path:"/payment", element:UserRoute(History)},
       { path:"/user/history", element:UserRoute(History)},
       { path:"/user/password", element:UserRoute(Password)},
@@ -78,7 +80,7 @@ function App() {
       { path:"/admin/category", element:AdminRoute(Category)},
       { path:"/admin/sub", element:AdminRoute(Subcategory)},
       { path:"/admin/products", element:AdminRoute(ProductCreate)},
-      { path:"/admin/coupon", element:AdminRoute(ProductCreate)},
+      { path:"/admin/coupon", element:AdminRoute(CreateCouponPage)},
      ]
 
   return (
