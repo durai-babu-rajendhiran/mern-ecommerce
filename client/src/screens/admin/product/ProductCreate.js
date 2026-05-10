@@ -66,7 +66,7 @@ const ProductCreate = () => {
   const loadCategories = async () => {
     try {
       const res = await getCategories();
-      setValues((prevValues) => ({ ...prevValues, categories: res }));
+      setValues((prevValues) => ({ ...prevValues, categories: res.data }));
       setCategories(res.data);
     } catch (error) {
       console.error("Failed to load categories:", error);
