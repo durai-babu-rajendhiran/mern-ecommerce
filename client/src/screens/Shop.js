@@ -2,106 +2,95 @@ import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import ProductCard from "../components/cards/ProductCard";
 import Star from "../components/forms/Star";
-import { getProductByCount, fetchProductsByFilter, getCategories,getCreateSub } from "../utils/ApiRoute";
+import { getProductByCount, fetchProductsByFilter, getCategories, getCreateSub } from "../utils/ApiRoute";
 
 const Shop = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [price, setPrice] = useState([0, 0]);
-  const [ok, setOk] = useState(false);
+  const [price, setPrice] = useState([0, 5000]);
   const [categories, setCategories] = useState([]);
   const [categoryIds, setCategoryIds] = useState([]);
   const [star, setStar] = useState("");
   const [subs, setSubs] = useState([]);
   const [sub, setSub] = useState("");
-  const [brands, setBrands] = useState(["Apple", "Samsung", "Microsoft", "Lenovo", "ASUS"]);
+  const [brands] = useState(["Apple", "Samsung", "Microsoft", "Lenovo", "ASUS"]);
   const [brand, setBrand] = useState("");
-  const [colors, setColors] = useState(["Black", "Brown", "Silver", "White", "Blue"]);
+  const [colors] = useState(["Black", "Brown", "Silver", "White", "Blue"]);
   const [color, setColor] = useState("");
   const [shipping, setShipping] = useState("");
+  const [showMobileFilter, setShowMobileFilter] = useState(false);
 
-  let dispatch = useDispatch();
-  let { search } = useSelector((state) => ({ ...state }));
+  const dispatch = useDispatch();
+  const { search } = useSelector((state) => ({ ...state }));
   const { text } = search;
 
   useEffect(() => {
     loadAllProducts();
-    // fetch categories
-    getCategories().then((res) => setCategories(res.data));
-    // fetch subcategories
-    getCreateSub().then((res) => setSubs(res.data));
+    getCategories().then((res) => {
+      const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+      setCategories(list);
+    }).catch(() => {});
+
+    getCreateSub().then((res) => {
+      const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+      setSubs(list);
+    }).catch(() => {});
   }, []);
 
-  const fetchProducts = (arg) => {
-    fetchProductsByFilter(arg).then((res) => {
-      setProducts(res.data);
-    });
+  const loadAllProducts = () => {
+    setLoading(true);
+    getProductByCount(24)
+      .then((p) => {
+        const list = Array.isArray(p?.data) ? p.data : (Array.isArray(p) ? p : []);
+        setProducts(list);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   };
 
-  const loadAllProducts = () => {
-    getProductByCount(12).then((p) => {
-      setProducts(p.data);
-      setLoading(false);
-    });
+  const fetchProducts = (arg) => {
+    setLoading(true);
+    fetchProductsByFilter(arg)
+      .then((res) => {
+        const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+        setProducts(list);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   };
 
   useEffect(() => {
     const delayed = setTimeout(() => {
-      fetchProducts({ query: text });
-      if (!text) {
+      if (text) {
+        fetchProducts({ query: text });
+      } else {
         loadAllProducts();
       }
     }, 300);
     return () => clearTimeout(delayed);
   }, [text]);
 
-  useEffect(() => {
-    console.log("ok to request");
-    fetchProducts({ price });
-  }, [ok]);
-
-  const handleSlider = (value) => {
-    dispatch({
-      type: "SEARCH_QUERY",
-      payload: { text: "" },
-    });
-    // reset
+  const resetFilters = () => {
+    dispatch({ type: "SEARCH_QUERY", payload: { text: "" } });
+    setPrice([0, 5000]);
     setCategoryIds([]);
-    setPrice(value);
     setStar("");
     setSub("");
     setBrand("");
     setColor("");
     setShipping("");
-    setTimeout(() => {
-      setOk(!ok);
-    }, 300);
+    loadAllProducts();
   };
 
-  const showCategories = () =>
-    categories.map((c) => (
-      <div key={c._id}>
-        <input
-          type="checkbox"
-          onChange={handleCheck}
-          value={c._id}
-          checked={categoryIds.includes(c._id)}
-        />
-        <label className="pl-2">{c.name}</label>
-      </div>
-    ));
+  const handlePriceChange = (e) => {
+    const maxVal = Number(e.target.value);
+    setPrice([0, maxVal]);
+    dispatch({ type: "SEARCH_QUERY", payload: { text: "" } });
+    fetchProducts({ price: [0, maxVal] });
+  };
 
-  const handleCheck = (e) => {
-    dispatch({
-      type: "SEARCH_QUERY",
-      payload: { text: "" },
-    });
-    setPrice([0, 0]);
-    setStar("");
-    setSub("");
-    setBrand("");
-    setColor("");
-    setShipping("");
+  const handleCategoryCheck = (e) => {
+    dispatch({ type: "SEARCH_QUERY", payload: { text: "" } });
     let inTheState = [...categoryIds];
     let justChecked = e.target.value;
     let foundInTheState = inTheState.indexOf(justChecked);
@@ -111,221 +100,272 @@ const Shop = () => {
       inTheState.splice(foundInTheState, 1);
     }
     setCategoryIds(inTheState);
-    fetchProducts({ category: inTheState });
+    if (inTheState.length) {
+      fetchProducts({ category: inTheState });
+    } else {
+      loadAllProducts();
+    }
   };
 
   const handleStarClick = (num) => {
-    dispatch({
-      type: "SEARCH_QUERY",
-      payload: { text: "" },
-    });
-    setPrice([0, 0]);
-    setCategoryIds([]);
     setStar(num);
-    setSub("");
-    setBrand("");
-    setColor("");
-    setShipping("");
+    dispatch({ type: "SEARCH_QUERY", payload: { text: "" } });
     fetchProducts({ stars: num });
   };
 
-  const showStars = () => (
-    <div className="pr-4 pl-4 pb-2">
-      <Star starClick={handleStarClick} numberOfStars={5} />
-      <Star starClick={handleStarClick} numberOfStars={4} />
-      <Star starClick={handleStarClick} numberOfStars={3} />
-      <Star starClick={handleStarClick} numberOfStars={2} />
-      <Star starClick={handleStarClick} numberOfStars={1} />
+  const handleSubClick = (s) => {
+    setSub(s._id);
+    dispatch({ type: "SEARCH_QUERY", payload: { text: "" } });
+    fetchProducts({ sub: s._id });
+  };
+
+  const handleBrandClick = (b) => {
+    const nextBrand = brand === b ? "" : b;
+    setBrand(nextBrand);
+    dispatch({ type: "SEARCH_QUERY", payload: { text: "" } });
+    if (nextBrand) {
+      fetchProducts({ brand: nextBrand });
+    } else {
+      loadAllProducts();
+    }
+  };
+
+  const handleColorClick = (c) => {
+    const nextColor = color === c ? "" : c;
+    setColor(nextColor);
+    dispatch({ type: "SEARCH_QUERY", payload: { text: "" } });
+    if (nextColor) {
+      fetchProducts({ color: nextColor });
+    } else {
+      loadAllProducts();
+    }
+  };
+
+  const handleShippingChange = (s) => {
+    const nextShipping = shipping === s ? "" : s;
+    setShipping(nextShipping);
+    dispatch({ type: "SEARCH_QUERY", payload: { text: "" } });
+    if (nextShipping) {
+      fetchProducts({ shipping: nextShipping });
+    } else {
+      loadAllProducts();
+    }
+  };
+
+  const filterContent = (
+    <div className="filter-sidebar p-3 bg-white rounded-4 border">
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h5 className="fw-bold mb-0">
+          <i className="fas fa-filter text-crimson me-2"></i>Filters
+        </h5>
+        <button onClick={resetFilters} className="btn btn-sm btn-outline-secondary py-1 px-2" style={{ fontSize: '11px' }}>
+          Reset All
+        </button>
+      </div>
+      <hr />
+
+      {/* Price Range Filter */}
+      <div className="mb-4">
+        <div className="d-flex justify-content-between align-items-center mb-2">
+          <label className="fw-bold small mb-0">Price Ceiling</label>
+          <span className="badge bg-crimson">${price[1]}</span>
+        </div>
+        <input
+          type="range"
+          min="100"
+          max="5000"
+          step="50"
+          value={price[1]}
+          onChange={handlePriceChange}
+          className="form-range"
+        />
+        <div className="d-flex justify-content-between text-muted" style={{ fontSize: '11px' }}>
+          <span>$100</span>
+          <span>$5,000</span>
+        </div>
+      </div>
+
+      {/* Categories */}
+      <div className="mb-4">
+        <label className="fw-bold small mb-2 d-block">Categories</label>
+        <div className="d-flex flex-column gap-1" style={{ maxHeight: '180px', overflowY: 'auto' }}>
+          {categories.map((c) => (
+            <div key={c._id} className="form-check">
+              <input
+                type="checkbox"
+                className="form-check-input"
+                id={`cat-${c._id}`}
+                value={c._id}
+                checked={categoryIds.includes(c._id)}
+                onChange={handleCategoryCheck}
+              />
+              <label className="form-check-label small" htmlFor={`cat-${c._id}`}>
+                {c.name}
+              </label>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Sub Categories */}
+      {subs && subs.length > 0 && (
+        <div className="mb-4">
+          <label className="fw-bold small mb-2 d-block">Sub Categories</label>
+          <div className="d-flex flex-wrap gap-1">
+            {subs.map((s) => (
+              <button
+                key={s._id}
+                type="button"
+                onClick={() => handleSubClick(s)}
+                className={`btn btn-sm ${
+                  sub === s._id ? 'btn-crimson' : 'btn-outline-secondary'
+                } rounded-pill py-1 px-2`}
+                style={{ fontSize: '12px' }}
+              >
+                {s.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Brands */}
+      <div className="mb-4">
+        <label className="fw-bold small mb-2 d-block">Brand</label>
+        <div className="d-flex flex-wrap gap-1">
+          {brands.map((b) => (
+            <button
+              key={b}
+              onClick={() => handleBrandClick(b)}
+              className={`btn btn-sm ${
+                brand === b ? 'btn-crimson' : 'btn-outline-secondary'
+              } rounded-pill py-1 px-2`}
+              style={{ fontSize: '12px' }}
+            >
+              {b}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Colors */}
+      <div className="mb-4">
+        <label className="fw-bold small mb-2 d-block">Color</label>
+        <div className="d-flex flex-wrap gap-1">
+          {colors.map((c) => (
+            <button
+              key={c}
+              onClick={() => handleColorClick(c)}
+              className={`btn btn-sm ${
+                color === c ? 'btn-crimson' : 'btn-outline-secondary'
+              } rounded-pill py-1 px-2`}
+              style={{ fontSize: '12px' }}
+            >
+              {c}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Ratings */}
+      <div className="mb-4">
+        <label className="fw-bold small mb-2 d-block">Minimum Rating</label>
+        <div className="d-flex flex-column gap-1">
+          {[5, 4, 3, 2, 1].map((n) => (
+            <div
+              key={n}
+              onClick={() => handleStarClick(n)}
+              className={`p-1 px-2 rounded-2 ${star === n ? 'bg-crimson-soft' : ''}`}
+              style={{ cursor: 'pointer' }}
+            >
+              <Star starClick={() => handleStarClick(n)} numberOfStars={n} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Shipping */}
+      <div className="mb-2">
+        <label className="fw-bold small mb-2 d-block">Fast Shipping</label>
+        <div className="d-flex gap-2">
+          {['Yes', 'No'].map((s) => (
+            <button
+              key={s}
+              onClick={() => handleShippingChange(s)}
+              className={`btn btn-sm ${
+                shipping === s ? 'btn-crimson' : 'btn-outline-secondary'
+              } flex-fill py-1`}
+              style={{ fontSize: '12px' }}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 
-  const showSubs = () =>
-    subs.map((s) => (
-      <div
-        key={s._id}
-        onClick={() => handleSub(s)}
-        className="p-1 m-1 badge badge-secondary"
-        style={{ cursor: "pointer" }}
-      >
-        {s.name}
-      </div>
-    ));
-
-  const handleSub = (sub) => {
-    setSub(sub);
-    dispatch({
-      type: "SEARCH_QUERY",
-      payload: { text: "" },
-    });
-    setPrice([0, 0]);
-    setCategoryIds([]);
-    setStar("");
-    setBrand("");
-    setColor("");
-    setShipping("");
-    fetchProducts({ sub });
-  };
-
-  const showBrands = () =>
-    brands.map((b) => (
-      <div key={b}>
-        <input
-          type="radio"
-          value={b}
-          checked={b === brand}
-          onChange={handleBrand}
-        />
-        <label className="pl-2">{b}</label>
-      </div>
-    ));
-
-  const handleBrand = (e) => {
-    setSub("");
-    dispatch({
-      type: "SEARCH_QUERY",
-      payload: { text: "" },
-    });
-    setPrice([0, 0]);
-    setCategoryIds([]);
-    setStar("");
-    setColor("");
-    setBrand(e.target.value);
-    setShipping("");
-    fetchProducts({ brand: e.target.value });
-  };
-
-  const showColors = () =>
-    colors.map((c) => (
-      <div key={c}>
-        <input
-          type="radio"
-          value={c}
-          checked={c === color}
-          onChange={handleColor}
-        />
-        <label className="pl-2">{c}</label>
-      </div>
-    ));
-
-  const handleColor = (e) => {
-    setSub("");
-    dispatch({
-      type: "SEARCH_QUERY",
-      payload: { text: "" },
-    });
-    setPrice([0, 0]);
-    setCategoryIds([]);
-    setStar("");
-    setBrand("");
-    setColor(e.target.value);
-    setShipping("");
-    fetchProducts({ color: e.target.value });
-  };
-
-  const showShipping = () => (
-    <>
-      <div>
-        <input
-          type="checkbox"
-          onChange={handleShippingchange}
-          value="Yes"
-          checked={shipping === "Yes"}
-        />
-        <label className="pl-2">Yes</label>
-      </div>
-      <div>
-        <input
-          type="checkbox"
-          onChange={handleShippingchange}
-          value="No"
-          checked={shipping === "No"}
-        />
-        <label className="pl-2">No</label>
-      </div>
-    </>
-  );
-
-  const handleShippingchange = (e) => {
-    setSub("");
-    dispatch({
-      type: "SEARCH_QUERY",
-      payload: { text: "" },
-    });
-    setPrice([0, 0]);
-    setCategoryIds([]);
-    setStar("");
-    setBrand("");
-    setColor("");
-    setShipping(e.target.value);
-    fetchProducts({ shipping: e.target.value });
-  };
-
   return (
-    <div className="container-fluid">
-      <div className="row">
-        <div className="col-md-3 pt-2">
-          <h4>Search/Filter</h4>
-          <hr />
-
-          {/* Filter Section */}
-          <div>
-            <h6><i className="fas fa-dollar-sign"></i> Price</h6>
-            <input
-              type="range"
-              min="0"
-              max="4999"
-              value={price}
-              onChange={(e) => handleSlider([e.target.value, price[1]])}
-            />
-          </div>
-
-          <div>
-            <h6><i className="fas fa-list"></i> Categories</h6>
-            <div>{showCategories()}</div>
-          </div>
-
-          <div>
-            <h6><i className="fas fa-star"></i> Rating</h6>
-            <div>{showStars()}</div>
-          </div>
-
-          <div>
-            <h6><i className="fas fa-cogs"></i> Sub Categories</h6>
-            <div>{showSubs()}</div>
-          </div>
-
-          <div>
-            <h6><i className="fas fa-tags"></i> Brands</h6>
-            <div>{showBrands()}</div>
-          </div>
-
-          <div>
-            <h6><i className="fas fa-palette"></i> Colors</h6>
-            <div>{showColors()}</div>
-          </div>
-
-          <div>
-            <h6><i className="fas fa-shipping-fast"></i> Shipping</h6>
-            <div>{showShipping()}</div>
-          </div>
+    <div className="container py-4">
+      {/* Top Banner / Breadcrumb */}
+      <div className="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+        <div>
+          <h3 className="fw-bold mb-1">
+            <i className="fas fa-boxes-stacked text-crimson me-2"></i>Product Catalog
+          </h3>
+          <p className="text-muted small mb-0">
+            Found {products.length} matching products
+            {text && <span> for keyword "<b>{text}</b>"</span>}
+          </p>
         </div>
 
-        <div className="col-md-9 pt-2">
-          {loading ? (
-            <h4 className="text-danger">Loading...</h4>
-          ) : (
-            <h4 className="text-danger">Products</h4>
-          )}
+        {/* Mobile Filter Toggle Button */}
+        <button
+          onClick={() => setShowMobileFilter(!showMobileFilter)}
+          className="btn btn-outline-crimson d-lg-none"
+        >
+          <i className="fas fa-sliders me-1"></i> {showMobileFilter ? 'Hide Filters' : 'Filters'}
+        </button>
+      </div>
 
-          {products?.length < 1 && <p>No products found</p>}
+      <div className="row g-4">
+        {/* Desktop Sidebar Filters */}
+        <div className="col-lg-3 d-none d-lg-block">
+          {filterContent}
+        </div>
 
-          <div className="row pb-5">
-            {Array.isArray(products) && products.map((p) => (
-              <div key={p._id} className="col-md-4 mt-3">
-                <ProductCard product={p} />
-              </div>
-            ))}
+        {/* Mobile Collapsible Filters */}
+        {showMobileFilter && (
+          <div className="col-12 d-lg-none">
+            {filterContent}
           </div>
+        )}
+
+        {/* Product Grid */}
+        <div className="col-12 col-lg-9">
+          {loading ? (
+            <div className="text-center py-5">
+              <div className="spinner-border text-crimson" role="status"></div>
+              <div className="mt-2 text-muted">Updating products...</div>
+            </div>
+          ) : products.length > 0 ? (
+            <div className="row g-3">
+              {products.map((p) => (
+                <div key={p._id} className="col-12 col-sm-6 col-md-4">
+                  <ProductCard product={p} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-5 bg-white rounded-4 border">
+              <i className="fas fa-box-open text-muted fs-1 mb-3"></i>
+              <h5>No products match your filter</h5>
+              <p className="text-muted small">Try broadening your search or resetting filters.</p>
+              <button onClick={resetFilters} className="btn btn-crimson btn-sm">
+                Reset All Filters
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

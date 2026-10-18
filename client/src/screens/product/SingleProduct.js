@@ -1,7 +1,7 @@
-import React,{useState,useMemo} from 'react';
+import React, { useState, useMemo } from 'react';
 import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
-import { BASEURL,addToWishlist } from '../../utils/ApiRoute';
+import { BASEURL, addToWishlist } from '../../utils/ApiRoute';
 import ProductListItems from './ProductListItems';
 import RatingModal from '../../components/modal/RatingModal';
 import { showAverage } from './Function';
@@ -10,87 +10,62 @@ import _ from "lodash";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
+const resolveImageSrc = (img) => {
+  if (!img) return '/assets/images/laptop.png';
+  if (typeof img === 'string') {
+    if (img.startsWith('http://') || img.startsWith('https://')) return img;
+    return `${BASEURL}${img.startsWith('/') ? img.slice(1) : img}`;
+  }
+  if (img.url) {
+    if (img.url.startsWith('http')) return img.url;
+    return `${BASEURL}${img.url}`;
+  }
+  return '/assets/images/laptop.png';
+};
+
 const ImageCarousel = ({ images }) => (
-  <Carousel showArrows autoPlay infiniteLoop>
+  <Carousel showArrows autoPlay infiniteLoop className="rounded-4 overflow-hidden shadow-sm">
     {images.map((image, index) => (
-      <img src={`${BASEURL}${image}`} alt={`Product Image ${index}`} key={index} />
+      <div key={index} style={{ maxHeight: '420px', background: '#F8FAFC' }}>
+        <img
+          src={resolveImageSrc(image)}
+          alt={`Product view ${index}`}
+          style={{ maxHeight: '420px', width: '100%', objectFit: 'contain' }}
+        />
+      </div>
     ))}
   </Carousel>
 );
 
 const NoImagePlaceholder = () => (
-  <div className="card mb-3">
-    <img src="/assets/images/laptop.png" className="card-img-top" alt="Placeholder" />
+  <div className="card mb-3 border-0 bg-light rounded-4 overflow-hidden">
+    <img
+      src="/assets/images/laptop.png"
+      className="card-img-top"
+      alt="Placeholder"
+      style={{ maxHeight: '350px', objectFit: 'contain' }}
+    />
   </div>
 );
-
-const TabLinks = () => (
-  <ul className="nav nav-tabs" id="myTab" role="tablist">
-    <li className="nav-item" role="presentation">
-      <a
-        className="nav-link active"
-        id="description-tab"
-        data-bs-toggle="tab"
-        href="#description"
-        role="tab"
-        aria-controls="description"
-        aria-selected="true"
-      >
-        Description
-      </a>
-    </li>
-    <li className="nav-item" role="presentation">
-      <a
-        className="nav-link"
-        id="more-tab"
-        data-bs-toggle="tab"
-        href="#more"
-        role="tab"
-        aria-controls="more"
-        aria-selected="false"
-      >
-        More
-      </a>
-    </li>
-  </ul>
-);
-
-const TabContent = ({ description }) => (
-  <div className="tab-content" id="myTabContent">
-    <div
-      className="tab-pane fade show active"
-      id="description"
-      role="tabpanel"
-      aria-labelledby="description-tab"
-    >
-      <div className="container mt-3">
-        <p>{description}</p>
-      </div>
-    </div>
-    <div className="tab-pane fade" id="more" role="tabpanel" aria-labelledby="more-tab">
-      <div className="container mt-3">
-        Call us on xxxx xxx xxx to learn more about this product.
-      </div>
-    </div>
-  </div>
-);
-
 
 const SingleProduct = ({ product = {}, loadSingleProduct }) => {
-  const [tooltip, setTooltip] = useState("Click to add");
   const navigate = useNavigate();
-  const { user, cart } = useSelector((state) => ({ ...state }));
   const dispatch = useDispatch();
-  const [modalShow, setModalShow] = useState(false);   // Hover state for highlighting
+  const { user } = useSelector((state) => ({ ...state }));
+  const [modalShow, setModalShow] = useState(false);
+  const [added, setAdded] = useState(false);
 
   const averageRating = useMemo(() => {
-    return product.ratings && product.ratings.length > 0 ? showAverage(product) : "No rating yet";
+    return product.ratings && product.ratings.length > 0 ? showAverage(product) : (
+      <span className="text-muted small">No customer ratings yet</span>
+    );
   }, [product]);
-  if (!product) {
-    return <div>Loading...</div>;  // Still valid since hooks are initialized above
+
+  if (!product || !product.title) {
+    return <div className="text-center py-5">Loading product...</div>;
   }
 
-  const { title, images, description, _id } = product;
+  const { title, images, description, price, quantity, brand } = product;
 
   const handleAddToCart = () => {
     let cart = [];
@@ -101,7 +76,8 @@ const SingleProduct = ({ product = {}, loadSingleProduct }) => {
       cart.push({ ...product, count: 1 });
       let unique = _.uniqWith(cart, _.isEqual);
       localStorage.setItem("cart", JSON.stringify(unique));
-      setTooltip("Added");
+      setAdded(true);
+      setTimeout(() => setAdded(false), 2000);
 
       dispatch({ type: "ADD_TO_CART", payload: unique });
       dispatch({ type: "SET_VISIBLE", payload: true });
@@ -110,42 +86,142 @@ const SingleProduct = ({ product = {}, loadSingleProduct }) => {
 
   const handleAddToWishlist = (e) => {
     e.preventDefault();
-    addToWishlist(product._id, user.token).then((res) => {
-      console.log("ADDED TO WISHLIST", res.data);
-      toast.success("Added to wishlist");
-      navigate("/user/wishlist");
-    });
+    if (!user || !user.token) {
+      toast.info("Please login to save this item to your wishlist");
+      navigate("/login");
+      return;
+    }
+    addToWishlist(product._id, user.token)
+      .then((res) => {
+        toast.success("Added to your wishlist!");
+        navigate("/user/wishlist");
+      })
+      .catch((err) => {
+        toast.error("Could not add to wishlist");
+      });
   };
 
   const handleModal = () => {
     if (user && user.token) {
       setModalShow(true);
     } else {
-      navigate("/login", {  });
+      toast.info("Please login to submit a review");
+      navigate("/login");
     }
   };
+
   return (
     <>
-      <div className="col-md-7">
+      {/* Product Image Carousel */}
+      <div className="col-12 col-lg-7 mb-4">
         {images && images.length ? (
           <ImageCarousel images={images} />
         ) : (
           <NoImagePlaceholder />
         )}
-        <TabLinks />
-        <TabContent description={description} />
+
+        {/* Tab Links */}
+        <div className="card border-0 shadow-sm rounded-4 mt-4 p-3">
+          <ul className="nav nav-pills mb-3" id="productTab" role="tablist">
+            <li className="nav-item" role="presentation">
+              <button
+                className="nav-link active bg-crimson"
+                id="desc-tab"
+                data-bs-toggle="pill"
+                data-bs-target="#desc-content"
+                type="button"
+                role="tab"
+              >
+                Description
+              </button>
+            </li>
+            <li className="nav-item ms-2" role="presentation">
+              <button
+                className="nav-link text-dark"
+                id="shipping-tab"
+                data-bs-toggle="pill"
+                data-bs-target="#shipping-content"
+                type="button"
+                role="tab"
+              >
+                Shipping & Returns
+              </button>
+            </li>
+          </ul>
+          <div className="tab-content" id="productTabContent">
+            <div className="tab-pane fade show active p-2" id="desc-content" role="tabpanel">
+              <p className="text-secondary" style={{ lineHeight: '1.7' }}>
+                {description}
+              </p>
+            </div>
+            <div className="tab-pane fade p-2" id="shipping-content" role="tabpanel">
+              <p className="text-secondary small mb-1">
+                • <b>Fast Shipping:</b> Express delivery within 2-4 business days.
+              </p>
+              <p className="text-secondary small mb-1">
+                • <b>Warranty:</b> 1-year official brand warranty and technical support.
+              </p>
+              <p className="text-secondary small">
+                • <b>Hassle-Free Returns:</b> 30-day money-back guarantee if unopened.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
-      <div className="col-md-5">
-        <div className="card-body d-flex flex-column align-items-center">
-          <div className="icon-wrapper mb-3">
-            <div className="card-title fw-bolder h2">{title}</div>
+
+      {/* Product Info & Actions */}
+      <div className="col-12 col-lg-5">
+        <div className="card border-0 shadow-sm rounded-4 p-4">
+          {brand && (
+            <span className="badge-crimson align-self-start mb-2">
+              {brand}
+            </span>
+          )}
+
+          <h2 className="fw-bold text-dark mb-2">{title}</h2>
+
+          <div className="d-flex align-items-center gap-3 mb-3">
+            <div className="fs-2 fw-bold text-crimson">${price}</div>
+            <span
+              className={`badge ${
+                quantity > 0 ? 'bg-success' : 'bg-danger'
+              } rounded-pill px-3 py-2`}
+            >
+              {quantity > 0 ? `In Stock (${quantity})` : 'Out of Stock'}
+            </span>
           </div>
+
+          <div className="d-flex align-items-center gap-2 mb-3 pb-3 border-bottom">
+            {averageRating}
+            <button
+              onClick={handleModal}
+              className="btn btn-sm btn-outline-crimson ms-auto py-1 px-3"
+            >
+              ★ Leave Rating
+            </button>
+          </div>
+
           <ProductListItems product={product} />
-          {averageRating}
- 
-          <div onClick={handleModal} className="btn btn-outline-danger mt-3 p-1">
-            <span>&#9733;</span> {user ? "Leave Rating" : "Login to leave Rating"}
+
+          {/* Action Buttons */}
+          <div className="d-flex flex-column gap-2 mt-4">
+            <button
+              onClick={handleAddToCart}
+              disabled={quantity < 1}
+              className="btn btn-crimson btn-lg w-100 py-3"
+            >
+              <i className={`fas ${added ? 'fa-check' : 'fa-cart-shopping'} me-2`}></i>
+              {quantity < 1 ? 'Out of Stock' : added ? 'Added to Cart!' : 'Add to Shopping Cart'}
+            </button>
+
+            <button
+              onClick={handleAddToWishlist}
+              className="btn btn-outline-secondary w-100 py-2"
+            >
+              <i className="far fa-heart me-2 text-crimson"></i> Save to Wishlist
+            </button>
           </div>
+
           {modalShow && (
             <RatingModal
               name={product._id}
@@ -155,23 +231,6 @@ const SingleProduct = ({ product = {}, loadSingleProduct }) => {
               product={product}
             />
           )}
-        <div className="action-buttons d-flex justify-content-around my-3">
-            <a
-              href="#"
-              onClick={handleAddToCart}
-              disabled={product.quantity < 1}
-              className="btn btn-outline-primary btn-sm my-2 mx-2"
-            >
-              <i className="fa-solid fa-cart-shopping" /> Add to Cart
-            </a>
-            <a
-              href="#"
-              className="btn btn-outline-secondary btn-sm my-2 mx-2"
-              onClick={handleAddToWishlist}
-            >
-              <i className="fa-regular fa-heart" /> Add to Wishlist
-            </a>
-          </div>
         </div>
       </div>
     </>

@@ -1,10 +1,13 @@
-const APIBASE_URL = process.env.REACT_APP_API || 'http://localhost:8000/';
+const rawApi = process.env.REACT_APP_API || 'http://localhost:8000/api/';
+const APIBASE_URL = rawApi.endsWith('/') ? rawApi : `${rawApi}/`;
 
-// Helper function to handle fetch requests
+// Helper function to handle fetch requests safely
 const fetchRequest = async (url, method = 'GET', token = null, body = null) => {
-    const headers = {
-        'Content-Type': 'application/json',
-    };
+    const cleanUrl = url.startsWith('/') ? url.slice(1) : url;
+    const headers = {};
+    if (!(body instanceof FormData)) {
+        headers['Content-Type'] = 'application/json';
+    }
     if (token) {
         headers['authtoken'] = `${token}`;
     }
@@ -14,15 +17,14 @@ const fetchRequest = async (url, method = 'GET', token = null, body = null) => {
     };
     if (body) {
         options.body = body instanceof FormData ? body : JSON.stringify(body);
-        if (body instanceof FormData) delete headers['Content-Type'];
     }
-    const response = await fetch(`${APIBASE_URL}${url}`, options);
+    const response = await fetch(`${APIBASE_URL}${cleanUrl}`, options);
     return response.json();
 };
 
-// User API
-export const BASEURL ='http://localhost:8000/'
+export const BASEURL = process.env.REACT_BASE_URL || 'http://localhost:8000/';
 
+// User API
 export const createUser = (token) =>
     fetchRequest('create-or-update-user', 'POST', token);
 
@@ -32,16 +34,17 @@ export const getCurrentUser = (token) =>
 export const getCurrentAdmin = (token) =>
     fetchRequest('current-admin', 'POST', token);
 
-export const userCart = (cart,token) =>
-    fetchRequest('/user/cart', 'POST', token,cart);
+export const userCart = (cart, token) =>
+    fetchRequest('user/cart', 'POST', token, cart);
 
-export const getOrders = () =>
-    fetchRequest('admin/orders', 'GET');
+export const getOrders = (token) =>
+    fetchRequest('admin/orders', 'GET', token);
+
 export const getCategory = () =>
-    fetchRequest('admin/orders', 'GET');
+    fetchRequest('categories', 'GET');
 
-export const changeOrderStatus = (orderId, status) =>
-    fetchRequest('admin/order-status', 'PUT', null, { orderId, status });
+export const changeOrderStatus = (orderId, status, token) =>
+    fetchRequest('admin/order-status', 'PUT', token, { orderId, status });
 
 // Category API
 export const getCategories = (token) =>
@@ -60,11 +63,11 @@ export const getCategorySub = (categoryId) =>
     fetchRequest(`category/subs/${categoryId}`, 'GET');
 
 // Subcategory API
-export const getCreateSub = (id = false,token) =>
+export const getCreateSub = (id = false, token) =>
     fetchRequest(`sub${id ? `/${id}` : ''}`, 'GET', token);
 
-export const CreateSub = (token,data) =>
-    fetchRequest(`sub`, 'POST', token,data);
+export const CreateSub = (token, data) =>
+    fetchRequest('sub', 'POST', token, data);
 
 export const getRemoveOrUpdateSub = (subId, data, token) =>
     fetchRequest(`sub/${subId}`, 'PUT', token, data);
@@ -79,16 +82,15 @@ export const deleteSub = (subId, token) =>
 export const getCoupons = () =>
     fetchRequest('coupons', 'GET');
 
-export const removeCoupon = (couponId) =>
-    fetchRequest(`coupon/${couponId}`, 'DELETE');
+export const removeCoupon = (couponId, token) =>
+    fetchRequest(`coupon/${couponId}`, 'DELETE', token);
 
-export const createCoupon = (data,token) =>
+export const createCoupon = (data, token) =>
     fetchRequest('coupon', 'POST', token, data);
 
 // Product API
 export const createProduct = (data, token) =>
     fetchRequest('product', 'POST', token, data);
-
 
 export const getProductByCount = (count) =>
     fetchRequest(`products/${count}`, 'GET');
@@ -96,62 +98,68 @@ export const getProductByCount = (count) =>
 export const getProducts = (data) =>
     fetchRequest('products', 'POST', null, data);
 
-export const getRemoveOrUpdateCountProduct = (productId, data,token) =>
+export const getRemoveOrUpdateCountProduct = (productId, data, token) =>
     fetchRequest(`product/${productId}`, 'PUT', token, data);
 
 export const getUpdateCountProduct = (productId) =>
     fetchRequest(`product/${productId}`, 'GET');
 
 export const productStar = (productId, star, token) =>
-    fetchRequest(`/product/star/${productId}`,'PUT',token,{ star })
+    fetchRequest(`product/star/${productId}`, 'PUT', token, { star });
 
 export const fetchProductsByFilter = (arg) =>
-    fetchRequest(`/search/filters`,'POST',null,arg)
+    fetchRequest('search/filters', 'POST', null, arg);
 
+export const getRelated = (productId) =>
+    fetchRequest(`product/related/${productId}`, 'GET');
 
-export const createPaymentIntent = (data) =>
-    fetchRequest('create-payment-intent', 'POST', null, data);
+export const createPaymentIntent = (data, token) =>
+    fetchRequest('create-payment-intent', 'POST', token, data);
 
-// image Upload
+// Image Upload
 export const uploadImage = (data, token) =>
     fetchRequest('uploadimages', 'POST', token, data);
 
 export const removeImage = (imageId, token) =>
     fetchRequest(`removeimage/${imageId}`, 'DELETE', token);
 
-
-//Admin
+// Admin & User Order/Wishlist/Cart
 export const changeStatus = (orderId, orderStatus, token) =>
-    fetchRequest(`admin/order-status`, 'PUT', token,{ orderId, orderStatus });
+    fetchRequest('admin/order-status', 'PUT', token, { orderId, orderStatus });
 
 export const getUserOrders = (token) =>
-    fetchRequest(`user/orders`, 'GET', token,null);
-
+    fetchRequest('user/orders', 'GET', token, null);
 
 export const getWishlist = (token) =>
-    fetchRequest(`user/wishlist`, 'GET', token,null);
-  
+    fetchRequest('user/wishlist', 'GET', token, null);
+
 export const removeWishlist = (productId, token) =>
-    fetchRequest(`user/wishlist/${productId}`, 'PUT', token,null);
-  
+    fetchRequest(`user/wishlist/${productId}`, 'PUT', token, null);
+
 export const addToWishlist = (productId, token) =>
-    fetchRequest(`user/wishlist`, 'POST', token,{productId});
-  
+    fetchRequest('user/wishlist', 'POST', token, { productId });
+
 export const getUserCart = (token) =>
-    fetchRequest(`user/cart`, 'GET', token,null);
-  
-  
+    fetchRequest('user/cart', 'GET', token, null);
+
 export const emptyUserCart = (token) =>
-    fetchRequest(`user/cart`, 'DELETE', token,null);
+    fetchRequest('user/cart', 'DELETE', token, null);
 
-export const saveUserAddress = (token,address) =>
-    fetchRequest(`user/address`, 'post', token,{ address });
+export const saveUserAddress = (token, address) =>
+    fetchRequest('user/address', 'POST', token, { address });
 
+export const applyCoupon = (token, coupon) =>
+    fetchRequest('user/cart/coupon', 'POST', token, { coupon });
 
-export const applyCoupon = (token,coupon) =>
-    fetchRequest(`user/cart/coupon`, 'post', token,{ coupon });
+export const createCashOrderForUser = (token, COD, couponTrueOrFalse) =>
+    fetchRequest('user/cash-order', 'POST', token, { couponApplied: couponTrueOrFalse, COD });
 
-export const createCashOrderForUser = (token,
-    COD,
-    couponTrueOrFalse ) =>
-    fetchRequest(`user/cash-order`, 'POST', token, { couponApplied: couponTrueOrFalse, COD });
+// AI Agent API
+export const sendAiMessage = (message) =>
+    fetchRequest('ai/chat', 'POST', null, { message });
+
+export const getAiSuggestions = () =>
+    fetchRequest('ai/suggestions', 'GET');
+
+export const getAiHealth = () =>
+    fetchRequest('ai/health', 'GET');
