@@ -52,34 +52,95 @@ const BestSellers = () => {
       )}
 
       {/* Pagination */}
-      {paginationInfo && paginationInfo.totalPages > 1 && (
-        <div className="d-flex justify-content-center mt-4">
-          <nav>
-            <ul className="pagination">
-              <li className={`page-item ${page === 1 ? 'disabled' : ''}`}>
-                <button className="page-link" onClick={() => setPage(page - 1)}>
-                  Previous
-                </button>
-              </li>
-              {[...Array(paginationInfo.totalPages)].map((_, i) => (
-                <li key={i} className={`page-item ${page === i + 1 ? 'active' : ''}`}>
-                  <button
-                    className={`page-link ${page === i + 1 ? 'bg-crimson border-crimson text-white' : ''}`}
-                    onClick={() => setPage(i + 1)}
-                  >
-                    {i + 1}
-                  </button>
+   {paginationInfo && paginationInfo.totalPages > 1 && (() => {
+  const totalPages = paginationInfo.totalPages;
+  
+  // Helper function to generate smart page numbers with ellipsis (...)
+  const getPageNumbers = () => {
+    const delta = 1; // Number of pages to show before and after current page
+    const range = [];
+    const rangeWithDots = [];
+    let l;
+
+    for (let i = 1; i <= totalPages; i++) {
+      if (i === 1 || i === totalPages || (i >= page - delta && i <= page + delta)) {
+        range.push(i);
+      }
+    }
+
+    for (let i of range) {
+      if (l) {
+        if (i - l === 2) {
+          rangeWithDots.push(l + 1);
+        } else if (i - l !== 1) {
+          rangeWithDots.push('...');
+        }
+      }
+      rangeWithDots.push(i);
+      l = i;
+    }
+
+    return rangeWithDots;
+  };
+
+  return (
+    <div className="d-flex flex-column align-items-center mt-4">
+      <nav aria-label="Page navigation">
+        <ul className="pagination shadow-sm mb-2">
+          {/* Previous Button */}
+          <li className={`page-item ${page === 1 ? 'disabled' : ''}`}>
+            <button 
+              className="page-link px-3" 
+              onClick={() => setPage(page - 1)}
+              disabled={page === 1}
+            >
+              &laquo; Prev
+            </button>
+          </li>
+
+          {/* Page Numbers with Ellipsis */}
+          {getPageNumbers().map((pageNum, idx) => {
+            if (pageNum === '...') {
+              return (
+                <li key={`dots-${idx}`} className="page-item disabled">
+                  <span className="page-link border-0 text-muted">...</span>
                 </li>
-              ))}
-              <li className={`page-item ${page === paginationInfo.totalPages ? 'disabled' : ''}`}>
-                <button className="page-link" onClick={() => setPage(page + 1)}>
-                  Next
+              );
+            }
+
+            const isActive = page === pageNum;
+            return (
+              <li key={pageNum} className={`page-item ${isActive ? 'active' : ''}`}>
+                <button
+                  className={`page-link ${isActive ? 'bg-crimson border-crimson text-white fw-bold shadow-none' : 'text-dark'}`}
+                  onClick={() => setPage(pageNum)}
+                >
+                  {pageNum}
                 </button>
               </li>
-            </ul>
-          </nav>
-        </div>
-      )}
+            );
+          })}
+
+          {/* Next Button */}
+          <li className={`page-item ${page === totalPages ? 'disabled' : ''}`}>
+            <button 
+              className="page-link px-3" 
+              onClick={() => setPage(page + 1)}
+              disabled={page === totalPages}
+            >
+              Next &raquo;
+            </button>
+          </li>
+        </ul>
+      </nav>
+      
+      {/* Optional: Results indicator for clarity */}
+      <small className="text-muted">
+        Page {page} of {totalPages}
+      </small>
+    </div>
+  );
+})()}
     </div>
   );
 };

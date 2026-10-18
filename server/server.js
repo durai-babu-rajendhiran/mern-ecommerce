@@ -6,13 +6,15 @@ const cors = require("cors");
 const { readdirSync } = require("fs");
 require("dotenv").config();
 
+const dns = require("node:dns");
+dns.setServers(["8.8.8.8", "1.1.1.1"]);
 //app
 const app = express();
 app.use(express.static(__dirname + "/uploads"));
 
 //db
 mongoose.connect(process.env.DATABASE).then(() => console.log("DB CONNECTED"))
-.catch((err) => console.log("DB CONNECTION ERR", err));
+// .catch((err) => console.log("DB CONNECTION ERR", err));
 //middleware
 app.use(morgan("dev"));
 app.use(bodyParser.json({ limit: "2mb" }));

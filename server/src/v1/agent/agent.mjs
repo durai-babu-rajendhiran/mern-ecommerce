@@ -13,7 +13,6 @@ dotenv.config({ path: path.join(__dirname, '../../../../.env') });
 
 const MONGO_URI = process.env.DATABASE || 'mongodb://127.0.0.1:27017/ecom-mern';
 
-// Ensure DB Connection
 export async function dbConnect() {
   if (mongoose.connection.readyState === 1) {
     return mongoose.connection;
@@ -21,12 +20,12 @@ export async function dbConnect() {
   return await mongoose.connect(MONGO_URI);
 }
 
-// Dynamically obtain Product and Category models from Mongoose
-let Product;
-let Category;
+// Dynamically obtain Product, Category, and Sub models
+let Product, Category, Sub;
 
 async function getModels() {
   await dbConnect();
+
   if (mongoose.models.Product) {
     Product = mongoose.models.Product;
   } else {
@@ -41,43 +40,82 @@ async function getModels() {
     Category = catMod.default || mongoose.model('Category');
   }
 
-  return { Product, Category };
+  if (mongoose.models.Sub) {
+    Sub = mongoose.models.Sub;
+  } else {
+    try {
+      const subMod = await import('../models/sub.js');
+      Sub = subMod.default || mongoose.model('Sub');
+    } catch (e) {
+      Sub = mongoose.models.Sub;
+    }
+  }
+
+  return { Product, Category, Sub };
+}
+
+// Helper to normalize search synonyms (e.g., "mobile phone" -> "smartphones")
+function expandQuery(query) {
+  let expanded = query;
+  if (/mobile|phone|cellphone|cell/i.test(query)) {
+    expanded += ' smartphone iphone android';
+  }
+  if (/laptop|notebook/i.test(query)) {
+    expanded += ' macbook pc';
+  }
+  return expanded;
 }
 
 export const productSearchTool = new DynamicStructuredTool({
   name: 'search_products',
-  description: 'Search the store for products by name, description, or category.',
+  description: 'Search the store for products by name, description, category, subcategory, or brand.',
   schema: z.object({
-    query: z.string().min(1).describe('Product name or keyword'),
+    query: z.string().min(1).describe('Product name, keyword, category, or subcategory name'),
   }),
 
   func: async ({ query }) => {
     await dbConnect();
-    const { Product, Category } = await getModels();
+    const { Product, Category, Sub } = await getModels();
 
-    // Escape regex special characters in user input.
-    const safeQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const searchQuery = expandQuery(query);
+    const words = searchQuery.split(/\s+/).filter(Boolean);
+    const regexConditions = words.map(w => new RegExp(w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'));
 
-    // Also look up category IDs matching query
+    // Find matching categories and subcategories
     let matchingCatIds = [];
+    let matchingSubIds = [];
+
     try {
-      const cats = await Category.find({ name: { $regex: safeQuery, $options: 'i' } }).select('_id').lean();
+      const cats = await Category.find({
+        $or: regexConditions.map(r => ({ name: {$regex: r } }))
+      }).select('_id').lean();
       matchingCatIds = cats.map(c => c._id);
     } catch (e) {}
 
+    try {
+      if (Sub) {
+        const subs = await Sub.find({
+          $or: regexConditions.map(r => ({ name: {$regex: r } }))
+        }).select('_id').lean();
+        matchingSubIds = subs.map(s => s._id);
+      }
+    } catch (e) {}
+
+    // Build product filter matching seeded database fields
     const filter = {
       $or: [
-        { title: { $regex: safeQuery, $options: 'i' } },
-        { name: { $regex: safeQuery, $options: 'i' } },
-        { description: { $regex: safeQuery, $options: 'i' } },
-        { brand: { $regex: safeQuery, $options: 'i' } },
-        ...(matchingCatIds.length ? [{ category: { $in: matchingCatIds } }] : [])
+        ...regexConditions.map(r => ({ title: { $regex: r } })),
+        ...regexConditions.map(r => ({ description: { $regex: r } })),
+        ...regexConditions.map(r => ({ brand: { $regex: r } })),
+        ...(matchingCatIds.length ? [{ category: { $in: matchingCatIds } }] : []),
+        ...(matchingSubIds.length ? [{ subs: { $in: matchingSubIds } }] : [])
       ],
     };
 
     const products = await Product.find(filter)
       .populate('category', 'name')
-      .select('title name description category price brand slug images quantity ratings')
+      .populate('subs', 'name')
+      .select('title description category subs price brand slug images quantity')
       .limit(10)
       .lean();
 
@@ -86,10 +124,10 @@ export const productSearchTool = new DynamicStructuredTool({
     }
 
     const formatted = products.map(p => ({
-      name: p.title || p.name,
-      title: p.title || p.name,
+      title: p.title,
       description: p.description,
-      category: p.category?.name || 'Electronics',
+      category: p.category?.name || 'General',
+      subCategories: Array.isArray(p.subs) ? p.subs.map(s => s.name).join(', ') : '',
       price: p.price,
       brand: p.brand,
       slug: p.slug,
@@ -114,10 +152,10 @@ export const priceSearchTool = new DynamicStructuredTool({
 
     const effectiveMax = maxPrice === Infinity ? 100000 : maxPrice;
     const products = await Product.find({
-      price: { $gte: minPrice, $lte: effectiveMax }
+      price: { $gte: minPrice,$lte: effectiveMax }
     })
       .populate('category', 'name')
-      .select('title name price category brand slug images quantity')
+      .select('title name price category subCategory brand slug images quantity')
       .limit(10)
       .lean();
 
@@ -129,7 +167,8 @@ export const priceSearchTool = new DynamicStructuredTool({
       name: p.title || p.name,
       title: p.title || p.name,
       price: p.price,
-      category: p.category?.name || 'Electronics',
+      category: p.category?.name || 'General',
+      subCategory: p.subCategory || '',
       brand: p.brand,
       slug: p.slug,
       image: Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : '',
@@ -151,10 +190,11 @@ export const tools = [productSearchTool, priceSearchTool];
 export const agentExecutor = createReactAgent({
   llm,
   tools,
-  messageModifier: `You are the friendly, helpful AI Shopping Assistant for this E-Commerce store.
-Always use the provided tools (search_products, search_by_price_range) to look up real store products, prices, and stock from our database.
-Format your responses nicely with product names, prices in USD ($), brands, and descriptions.
-Help customers choose the best items according to their budget and needs.`
+  messageModifier: `You are a friendly, flexible AI Shopping Assistant for this E-Commerce store. 
+You can handle general conversations, greetings, and casual questions, as well as product recommendations.
+When users ask about products, categories, subcategories, prices, or descriptions, ALWAYS use the provided tools (search_products, search_by_price_range) to fetch real items from the database.
+Format your responses nicely with product names, prices in USD ($), brands, descriptions, and categories/subcategories when available.
+If a query is general chat (e.g. "hi", "how are you"), respond politely and helpfully without forcing a database lookup.`
 });
 
 // Direct search helper for attaching rich product cards to chat
@@ -167,15 +207,21 @@ export async function directSearch(query) {
 
     let matchingCatIds = [];
     try {
-      const cats = await Category.find({ name: { $regex: safe, $options: 'i' } }).select('_id').lean();
+      const cats = await Category.find({
+        $or: [
+          { name: { $regex: safe,$options: 'i' } },
+          { subCategory: { $regex: safe,$options: 'i' } }
+        ]
+      }).select('_id').lean();
       matchingCatIds = cats.map(c => c._id);
     } catch (e) {}
 
     const products = await Product.find({
       $or: [
-        { title: { $regex: safe, $options: 'i' } },
-        { description: { $regex: safe, $options: 'i' } },
-        { brand: { $regex: safe, $options: 'i' } },
+        { title: { $regex: safe,$options: 'i' } },
+        { description: { $regex: safe,$options: 'i' } },
+        { brand: { $regex: safe,$options: 'i' } },
+        { subCategory: { $regex: safe,$options: 'i' } },
         ...(matchingCatIds.length ? [{ category: { $in: matchingCatIds } }] : [])
       ]
     })
@@ -189,7 +235,8 @@ export async function directSearch(query) {
       slug: p.slug,
       price: p.price,
       description: p.description,
-      category: p.category?.name || 'Electronics',
+      category: p.category?.name || 'General',
+      subCategory: p.subCategory || '',
       brand: p.brand,
       images: p.images || [],
       ratings: p.ratings || [],
